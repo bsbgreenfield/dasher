@@ -1,0 +1,9 @@
+.task-rect{
+    border: 1px solid black;
+    width: min-content;
+    padding: 10px;
+}
+.task-rect:hover{
+    cursor: pointer;
+    transform: scale(1.1);
+}

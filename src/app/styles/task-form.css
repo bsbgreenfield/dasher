@@ -1,0 +1,31 @@
+.task-form{
+    width: 200px;
+    display: flex;
+    flex-direction: column;
+}
+.task-form-grid{
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: 1fr 2fr 1fr;
+    row-gap: 20px;
+    column-gap: 10px;
+}
+
+.task-form-grid-desc{
+    grid-row-start: 2;
+}
+.task-form-grid-label{
+    grid-column: 1;
+}
+.task-form-grid-input{
+    grid-column: 2;
+}
+.task-form-grid-submit{
+    grid-column: 2;
+    border: 1px solid black;
+    user-select: none;
+    text-align: center;
+}
+.task-form-grid-submit:hover{
+    cursor: pointer;
+}

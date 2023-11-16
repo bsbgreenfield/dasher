@@ -1,0 +1,11 @@
+.task-button{
+    border: 1px solid black;
+    width: 100px;
+    text-align: center;
+    background-color: aliceblue;
+    user-select: none;
+}
+
+.task-button:hover{
+    cursor: pointer;
+}
