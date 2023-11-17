@@ -1,8 +1,32 @@
-import React from "react";
+import React, { useState } from "react";
 import { Task } from "../lib/definitions";
-export default function TaskRect({task}: {task: Task}){
+import { boolean } from "zod";
+export default function TaskRect({task, controlTaskDrag}: {
+    task: Task,
+    controlTaskDrag: (event: React.MouseEvent, pageGrab : () => void) => void
+}){
+
+    const [isBeingDragged, setIsBeingDragged] = useState(false);
+
+    if (isBeingDragged) console.log("Im being dragged");
+
+    const grabTask= (event: React.MouseEvent) => {
+        const options : AddEventListenerOptions = {
+            capture: true
+        }
+        setIsBeingDragged(true);
+        document.addEventListener("mousemove", function grab(){
+            controlTaskDrag(event, grab);
+        })
+        
+    }
+    const dropTask = (event: React.MouseEvent) => {
+        setIsBeingDragged(false);
+        
+        console.log("you dropped me!")
+    }
     const viewDetails = (event: React.MouseEvent) => {
-            console.log("HELLO")
+        
             if(event.currentTarget){
                 const selectedTask = event.currentTarget as HTMLDivElement;
                 if (selectedTask.getAttribute("data-open") == 'false'){
@@ -20,7 +44,13 @@ export default function TaskRect({task}: {task: Task}){
             event.preventDefault();
     }
     return (
-        <div className="task-rect" draggable="true" onClick={viewDetails} data-open='false'>
+        <div 
+        className="task-rect" 
+        draggable="true" 
+        onClick={viewDetails} 
+        data-open='false'
+        onMouseDown={grabTask}
+        >
             {task.name}
         </div>
     )

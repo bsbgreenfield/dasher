@@ -1,0 +1,21 @@
+.sandbox-bod-content{
+    display: flex;
+    justify-content: center;
+    margin-top: 10vh;
+    
+}
+.sandbox-body{
+    display: flex;
+    justify-content: center;
+
+}
+
+.prog-bar{
+    position: relative;
+    display: flex;
+    height: 65vh;
+    flex-direction: column;
+    align-items: center;
+    border: 1px solid black;
+    width: 25vw;
+}
