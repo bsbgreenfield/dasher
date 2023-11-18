@@ -1,29 +1,21 @@
-import React, { useState } from "react";
-import { Task } from "../lib/definitions";
-import { boolean } from "zod";
-export default function TaskRect({task, controlTaskDrag}: {
+
+import { Task, iDraggable, Draggable  } from "../lib/definitions";
+export default function TaskRect({task, index, yPos}: {
     task: Task,
-    controlTaskDrag: (event: React.MouseEvent, pageGrab : () => void) => void
+    index: number,
+    yPos: number,
 }){
-
-    const [isBeingDragged, setIsBeingDragged] = useState(false);
-
-    if (isBeingDragged) console.log("Im being dragged");
-
-    const grabTask= (event: React.MouseEvent) => {
-        const options : AddEventListenerOptions = {
-            capture: true
+    
+   
+    const draggableDiv = new Draggable();
+    
+    const grabTask = (evt: React.MouseEvent) => {
+        const thisDiv = document.getElementById(task.id) as HTMLDivElement;
+        thisDiv.parentElement?.addEventListener("mouseup",() => draggableDiv.stopMoving);
+        if(thisDiv){
+            draggableDiv.startMoving(thisDiv, thisDiv.parentElement as HTMLDivElement, evt)
         }
-        setIsBeingDragged(true);
-        document.addEventListener("mousemove", function grab(){
-            controlTaskDrag(event, grab);
-        })
-        
-    }
-    const dropTask = (event: React.MouseEvent) => {
-        setIsBeingDragged(false);
-        
-        console.log("you dropped me!")
+       
     }
     const viewDetails = (event: React.MouseEvent) => {
         
@@ -45,11 +37,12 @@ export default function TaskRect({task, controlTaskDrag}: {
     }
     return (
         <div 
+        id={task.id}
         className="task-rect" 
-        draggable="true" 
         onClick={viewDetails} 
         data-open='false'
         onMouseDown={grabTask}
+        style={{"top" : yPos}}
         >
             {task.name}
         </div>

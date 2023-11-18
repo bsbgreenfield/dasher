@@ -1,6 +1,6 @@
 'use client';
-import { useState } from "react";
-import { Role, Task, User } from "./lib/definitions";
+import { ReactComponentElement, useState } from "react";
+import { Role, Task, User, TaskMap } from "./lib/definitions";
 import "./styles/task-button.css"
 import TaskRect from './ui/taskRect';
 import "./styles/taskRect.css";
@@ -17,8 +17,8 @@ export default function Home() {
     username: "benji",
   };
 
-  const testTask: Task = {id: "testtest", name: "tester", description: "This is a test description", owner: user1}
-  const testTask2: Task = {id: "testtest2", name: "another", description: "This is a another test description", owner: user1}
+  const testTask: Task = {id: "testtest", name: "tester", description: "This is a test description", owner: user1, height: 50}
+  const testTask2: Task = {id: "testtest2", name: "another", description: "This is a another test description", owner: user1, height:50}
 
   const displayNewTask = (createdTask: Task) =>{
     const newTasks: Task[] = [...tasks, createdTask];
@@ -28,12 +28,22 @@ export default function Home() {
   const toggleForm = () =>{
     setFormVisible(!formVisible)
   }
-  const controlTaskDrag = (event: React.MouseEvent, grabListener: ()=> void) => {
-    document.addEventListener("mouseup", () => {
-      console.log("dropped")
-      document.removeEventListener("mousemove", grabListener)
-    })
-    console.log(event.clientX, event.clientY)
+  
+  const generateTaskArray= (tasks: Task[]): JSX.Element[] => {
+    const returnArray : TaskMap[] = [];
+    tasks.reduce((prevTask: TaskMap, currTask: Task)  => {
+      let task = currTask
+      let index = prevTask.index + 1
+      let yPos = prevTask.yPos + currTask.height
+      returnArray.push({task, index, yPos});
+      return {task, index, yPos}
+    }, {task : tasks[0], index: 0, yPos:0 });
+
+   const taskRectArray =  returnArray.map(
+      taskMap => <TaskRect task={taskMap.task} index={taskMap.index} yPos={taskMap.yPos}/>
+       )
+    console.log(taskRectArray);
+    return taskRectArray;
   }
 
   const [tasks, setTasks] = useState<Task[]>([testTask, testTask2])
@@ -53,7 +63,7 @@ export default function Home() {
      <div className="sandbox-body">
       <div className="sandbox-body-content">
         <div className="prog-bar">
-            {tasks.map(task => <TaskRect key={task.id.toString()} controlTaskDrag={controlTaskDrag} task={task} />)}
+            {generateTaskArray(tasks)}
           </div>
       </div>
      </div>
