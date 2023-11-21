@@ -1,6 +1,6 @@
 'use client';
 import { ReactComponentElement, useState } from "react";
-import { Role, Task, User, TaskMap } from "./lib/definitions";
+import { Role, Task, User, TaskMap} from "./lib/definitions";
 import "./styles/task-button.css"
 import TaskRect from './ui/taskRect';
 import "./styles/taskRect.css";
@@ -9,6 +9,7 @@ import "./styles/topbar.css";
 import "./styles/prog-bar.css";
 import "./styles/sandbox-body.css";
 import NewTaskForm from "./ui/newTaskForm";
+
 
 
 export default function Home() {
@@ -29,25 +30,57 @@ export default function Home() {
     setFormVisible(!formVisible)
   }
   
-  const generateTaskArray= (tasks: Task[]): JSX.Element[] => {
+  const generateTaskArray= (tasks: Task[]): React.JSX.Element[] => {
     const returnArray : TaskMap[] = [];
     tasks.reduce((prevTask: TaskMap, currTask: Task)  => {
       let task = currTask
       let index = prevTask.index + 1
       let yPos = prevTask.yPos + currTask.height
       returnArray.push({task, index, yPos});
+
+
       return {task, index, yPos}
     }, {task : tasks[0], index: 0, yPos:0 });
 
    const taskRectArray =  returnArray.map(
-      taskMap => <TaskRect task={taskMap.task} index={taskMap.index} yPos={taskMap.yPos}/>
+      taskMap => <TaskRect 
+      key={(taskMap.task.id)} 
+      task={ taskMap.task} 
+      index={taskMap.index} 
+      yPos={taskMap.yPos}
+      />
        )
-    console.log(taskRectArray);
+
+    
     return taskRectArray;
   }
 
+  const switchTaskIndices = (task: Task, oldIndex: number, newIndex: number) => {
+    const newTasks = [];
+    let wasPushed: boolean = false;
+    for(let i = 0; i < tasks.length + 1; i++){
+      if (!wasPushed){
+        if (i == oldIndex){
+          continue;
+        }
+        else if (i == newIndex){
+          newTasks.push(task);
+          wasPushed = true;
+        }
+        else{
+          newTasks.push(tasks[i]);
+        }
+      }
+     else{
+      newTasks.push(i - 1);
+     }
+      
+    }
+  }
   const [tasks, setTasks] = useState<Task[]>([testTask, testTask2])
   const [formVisible, setFormVisible] = useState<boolean>(false)
+
+  let allTaskComponents = generateTaskArray(tasks);
   return (
     <div>
       <div className="top-bar">
@@ -63,7 +96,7 @@ export default function Home() {
      <div className="sandbox-body">
       <div className="sandbox-body-content">
         <div className="prog-bar">
-            {generateTaskArray(tasks)}
+            {allTaskComponents}
           </div>
       </div>
      </div>

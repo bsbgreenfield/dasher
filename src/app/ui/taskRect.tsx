@@ -1,5 +1,5 @@
 
-import { Task, iDraggable, Draggable  } from "../lib/definitions";
+import { Task, Draggable  } from "../lib/definitions";
 export default function TaskRect({task, index, yPos}: {
     task: Task,
     index: number,
@@ -9,16 +9,16 @@ export default function TaskRect({task, index, yPos}: {
    
     const draggableDiv = new Draggable();
     
-    const grabTask = (evt: React.MouseEvent) => {
+    const grabTask = async (evt: React.MouseEvent) => {
         const thisDiv = document.getElementById(task.id) as HTMLDivElement;
         thisDiv.parentElement?.addEventListener("mouseup",() => draggableDiv.stopMoving);
         if(thisDiv){
-            draggableDiv.startMoving(thisDiv, thisDiv.parentElement as HTMLDivElement, evt)
+            draggableDiv.startMoving(thisDiv, thisDiv.parentElement as HTMLDivElement, evt, {x: 0, y: yPos})
         }
        
     }
     const viewDetails = (event: React.MouseEvent) => {
-        
+
             if(event.currentTarget){
                 const selectedTask = event.currentTarget as HTMLDivElement;
                 if (selectedTask.getAttribute("data-open") == 'false'){

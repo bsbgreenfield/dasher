@@ -1,4 +1,4 @@
-import React, { EventHandler, MouseEvent } from "react";
+import React, { MouseEvent } from "react";
 
 export type Task = {
     id: string,
@@ -25,10 +25,11 @@ export enum Role {
     other,
 }
 
+
 export interface iDraggable {
     move(divId: HTMLDivElement, xPos: number, yPos: number): void;
-    startMoving(divId: HTMLDivElement, container: HTMLDivElement, evt: React.MouseEvent): void;
-    stopMoving(container: HTMLDivElement): void;
+    startMoving(divId: HTMLDivElement, container: HTMLDivElement, evt: React.MouseEvent, originalPos: {x: number, y: number}): void;
+    stopMoving(container: HTMLDivElement, divId: HTMLDivElement): {newX: number, newY: number} | null;
 }
 
 export class Draggable implements iDraggable {
@@ -36,7 +37,7 @@ export class Draggable implements iDraggable {
         divId.style.left = xPos + 'px';
         divId.style.top = yPos + 'px';
     }
-    startMoving(divId: HTMLDivElement, container: HTMLDivElement, evt: React.MouseEvent): void {
+    startMoving(divId: HTMLDivElement, container: HTMLDivElement, evt: React.MouseEvent, originalPos: {x: number, y: number}): void{
         const containerBounds = container.getBoundingClientRect();
         let divWidth: number = divId.clientWidth; //width of draggable div
         let divHeight: number = divId.clientHeight; // height of draggable div
@@ -64,15 +65,26 @@ export class Draggable implements iDraggable {
         const stopMovingHandler: EventListener = () => {
             container.removeEventListener("mousemove", moveHandler as () => void);
             container.removeEventListener("mouseup", stopMovingHandler);
+            const newPos = this.stopMoving(container, divId);
+            if (newPos) {
+                this.move(divId, containerWidth/2 - divWidth/2, originalPos.y);
+            }
         }
 
         container.addEventListener("mousemove",moveHandler as () => void);
         container.addEventListener("mouseup", stopMovingHandler)      
         
     }
-    stopMoving(): void {
+    stopMoving(container: HTMLDivElement, divId: HTMLDivElement): { newX: number; newY: number } | null {
         console.log("stop");
-        document.onmousemove = ()=>{};
+        const containerBounds = container.getBoundingClientRect();
+        const divBounds = divId.getBoundingClientRect();
+
+        const newX = divBounds.left - containerBounds.left;
+        const newY = divBounds.top - containerBounds.top;
+
+        return { newX, newY };
     }
+    
 }
 
