@@ -33,11 +33,14 @@ export interface iDraggable {
 }
 
 export class Draggable implements iDraggable {
+    public finalPosition: number = -1;
+    public originalPosition: {x: number, y:number} = {x: 0, y: 0};
     move(divId: HTMLDivElement, xPos: number, yPos: number): void {
         divId.style.left = xPos + 'px';
         divId.style.top = yPos + 'px';
     }
     startMoving(divId: HTMLDivElement, container: HTMLDivElement, evt: React.MouseEvent, originalPos: {x: number, y: number}): void{
+        this.originalPosition = originalPos;
         const containerBounds = container.getBoundingClientRect();
         let divWidth: number = divId.clientWidth; //width of draggable div
         let divHeight: number = divId.clientHeight; // height of draggable div
@@ -65,26 +68,24 @@ export class Draggable implements iDraggable {
         const stopMovingHandler: EventListener = () => {
             container.removeEventListener("mousemove", moveHandler as () => void);
             container.removeEventListener("mouseup", stopMovingHandler);
-            const newPos = this.stopMoving(container, divId);
-            if (newPos) {
-                this.move(divId, containerWidth/2 - divWidth/2, originalPos.y);
-            }
         }
-
+        
         container.addEventListener("mousemove",moveHandler as () => void);
         container.addEventListener("mouseup", stopMovingHandler)      
         
     }
     stopMoving(container: HTMLDivElement, divId: HTMLDivElement): { newX: number; newY: number } | null {
-        console.log("stop");
+ 
+        const containerWidth= container.clientWidth
+        const divWidth= divId.clientWidth
         const containerBounds = container.getBoundingClientRect();
         const divBounds = divId.getBoundingClientRect();
 
         const newX = divBounds.left - containerBounds.left;
         const newY = divBounds.top - containerBounds.top;
-
+        this.move(divId, containerWidth/2 - divWidth/2, this.originalPosition.y)
         return { newX, newY };
     }
-    
+   
 }
 
