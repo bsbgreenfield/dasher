@@ -1,6 +1,6 @@
 'use client';
-import { useState, useEffect } from "react";
-import { Role, Task, User, TaskMap} from "./lib/definitions";
+import { useState, useEffect, useRef } from "react";
+import { Role, Task, User, TaskMap } from "./lib/definitions";
 import "./styles/task-button.css"
 import TaskRect from './ui/taskRect';
 import "./styles/taskRect.css";
@@ -17,113 +17,147 @@ export default function Home() {
     role: Role.developer,
     username: "benji",
   };
-  const colorArray : string[] = ["red", "blue", "yellow"];
-  const testTask: Task = {id: "0", name: "first", description: "This is a test description", owner: user1, height: 50}
-  const testTask2: Task = {id: "1", name: "second", description: "This is a another test description", owner: user1, height:50}
-  const testTask3: Task = {id: "2", name: "third", description: "This is a third test description!!", owner: user1, height:50}
-  const displayNewTask = (createdTask: Task) =>{
-    const newTasks: Task[] = [...tasks, createdTask];
-    setTasks(newTasks);
+  const colorArray: string[] = ["red", "blue", "yellow"];
+  const testTask: Task = {
+    id: "0",
+    name: "first",
+    description: "This is a test description",
+    owner: user1,
+    height: 50, index: 0
+  }
+  const testTask2: Task = {
+    id: "1",
+    name: "second",
+    description: "This is a another test description",
+    owner: user1,
+    height: 100, index: 1
+  }
+  const testTask3: Task = {
+    id: "2",
+    name: "third",
+    description: "This is a third test description!!",
+    owner: user1,
+    height: 200, index: 2
   }
 
-  const toggleForm = () =>{
+  let taskPosMapInit = new Map<number, [number, number]>([[0, [0, 50]], [1, [50, 100]], [2, [150, 200]]]);
+
+  const displayNewTask = (createdTask: Task) => {
+    const newTasks: Task[] = [...tasks.current, createdTask];
+    tasks.current = newTasks;
+  }
+
+  const toggleForm = () => {
     setFormVisible(!formVisible)
   }
-  const posMap = new Map<number, number>();
 
-  const generateTaskArray= (tasks: Task[]): React.JSX.Element[] => {
-    const returnArray : TaskMap[] = [];
-    tasks.reduce((prevTask: TaskMap, currTask: Task)  => {
-      let task: Task = currTask
-      let index: number = prevTask.index + 1
-      let yPos: number = prevTask.yPos + currTask.height
-      returnArray.push({task, index: index -1, yPos});
-      posMap.set(index - 1, yPos);
+  const generateTaskArray = (tasksWithNewIndices: Task[]): void => {
+    /* 
+    we take in an array of tasks, which have specified indices.
+    The goal is to create an array of task elements which is sorted based on these indices,
+    and to supply each task element with the a new y position, which in turn is informed by the height and y position of the previes element
+    first, we need to create a new Map<index, [yPosition, height]
+    the, we create the element array using the new values stored in the Map
+    **/
+    const newTaskPosMap = new Map<number, [number, number]>()
+    const newElementArray: React.JSX.Element[] = []; // initialize an empty array
+    let newYPos: number = 0; //initialize new position (pixels) for the first task element
 
-      return {task, index, yPos}
-    }, {task : tasks[0], index: 0, yPos:0 });
-  
-   const taskRectArray =  returnArray.map(
-      taskMap => <TaskRect 
-      key={(taskMap.task.id)} 
-      task={ taskMap.task} 
-      index={taskMap.index} 
-      yPos={taskMap.yPos}
-      positionMap={taskPosMap}
-      switchTaskIndices={switchTaskIndices}
-      color={colorArray[parseInt(taskMap.task.id)]}
-      />
-       )
+    for (let i = 0; i < tasksWithNewIndices.length; i++) {
 
-    
-    return taskRectArray;
-  }
-  useEffect(() => {
-    setTaskPosMap(posMap)
-  }, [])
+      let taskAtIthPosition = tasksWithNewIndices.find(task => task.index == i)
+      newTaskPosMap.set(i, [newYPos, taskAtIthPosition!.height])
+
+      let taskElement: React.JSX.Element =
+        <TaskRect
+          key={taskAtIthPosition!.id}
+          task={taskAtIthPosition!}
+          yPos={newYPos}
+          positionMap={} // this may be an issue as taskPosMap is not set at this point. Maybe it will update dynamically?
+          switchTaskIndices={switchTaskIndices}
+          color={colorArray[parseInt(taskAtIthPosition!.id)]}
+        />
+
+      newElementArray.push(taskElement);
+
+      newYPos = newYPos + taskAtIthPosition!.height
+    }
+
+    setTaskElementArray(newElementArray);
+
+  };
+
 
   const switchTaskIndices = (task: Task, oldIndex: number, newIndex: number) => {
-    [0, 1, 2]
     const newTasks: Task[] = [];
-    let wasPushed: boolean = false;
+    if (newIndex < 0) newIndex = 0; // im not sure why it does this.
     if (oldIndex == newIndex) return;
-    for(let i = 0; i <= tasks.length ; i++){
-      if (!wasPushed){
-        if (i == oldIndex){
-          console.log(`index is ${i} which = ${oldIndex}, doing nothing. newTasks = ${newTasks}`)
-          continue;
+    const movingDown = (oldIndex < newIndex);
+    for (let i = 0; i <= tasks.current.length - 1; i++) {
+      let newTask = tasks.current[i]
+      if(newTask.index == oldIndex){ // if this is the selected task, move it to its new position
+        newTask.index = newIndex
+      } 
+      else if (movingDown){
+        if (newTask.index <= newIndex && newTask.index >= oldIndex){ // if the task is moving down, everything at or above the new index needs to shift upwards
+          newTask.index = tasks.current[i].index - 1;                // also, if the task is above where the moving task started, do nothing
         }
-        else if (i == newIndex + 1){
-          newTasks.push(task);
-          wasPushed = true;
-          
-          console.log(`index is ${i} which = ${newIndex}, pushing ${task.name} newTasks = ${newTasks}`)
-        }
-        else{
-          newTasks.push(tasks[i]);
-          
-           console.log(`index is ${i}, pushing ${tasks[i].name} newTasks = ${newTasks}`) 
-        }
+            // otherwise, the position should stay the same
       }
-     else{
-        if (tasks[i-1] !== task){
-          newTasks.push(tasks[i - 1]);
+      else{ // if the task is moving up, everything at or below the new index needs to shift down
+        if(newTask.index  >= newIndex && newTask.index <= oldIndex){ // also , if the task is below where the selected task started, do nothing
+          newTask.index = tasks.current[i].index + 1;
         }
-      
-       console.log(`index is ${i}, pushing ${tasks[i-1].name} newTasks = ${newTasks}`) 
-     }
-      
+        // everything above the new index can stay where is was
+      }
+
+      newTasks.push(newTask);
     }
-    console.log(newTasks, oldIndex, newIndex);
-    setTasks(newTasks);
+
+    tasks.current = newTasks;
+
+    generateTaskArray(newTasks)
   }
-  const [tasks, setTasks] = useState<Task[]>([testTask, testTask2, testTask3])
+  const tasks = useRef<Task[]>([testTask, testTask2, testTask3])
   const [formVisible, setFormVisible] = useState<boolean>(false)
-  const [taskPosMap, setTaskPosMap] = useState(new Map<number, number>);
+
+  let [taskElementArray, setTaskElementArray] = useState<React.JSX.Element[]>(
+    [
+      <TaskRect key={(testTask.id)} task={testTask} yPos={0} positionMap={taskPosMapInit} color="red" switchTaskIndices={switchTaskIndices} />,
+      <TaskRect key={(testTask2.id)} task={testTask2} yPos={50} positionMap={taskPosMapInit} color="blue" switchTaskIndices={switchTaskIndices} />,
+      <TaskRect key={(testTask3.id)} task={testTask3} yPos={150} positionMap={taskPosMapInit} color="yellow" switchTaskIndices={switchTaskIndices} />
+    ]
+  )
 
 
+  useEffect(() => {
+    generateTaskArray(tasks.current)
+  }, []
+
+    // Flow: move task -> switchTaskIndices -> update tasks -> generate task element array -> render new task element array
+  );
   return (
     <div>
       <div className="top-bar">
         <div className="task-button"
-         onClick={ !formVisible ?
-          ()=> setFormVisible(true)
-          : () => setFormVisible(false)
+          onClick={!formVisible ?
+            () => setFormVisible(true)
+            : () => setFormVisible(false)
           }>
           {formVisible ? "Cancel" : "Create new Task"}
         </div>
       </div>
-      <NewTaskForm toggleForm= {toggleForm} displayNewTask = {displayNewTask} formVisible = {formVisible}/>
-     <div className="sandbox-body">
-      <div className="sandbox-body-content">
-        <div className="prog-bar">
-            {generateTaskArray(tasks)}
+      <NewTaskForm toggleForm={toggleForm} displayNewTask={displayNewTask} formVisible={formVisible} />
+      <div className="sandbox-body">
+        <div className="sandbox-body-content">
+          <div className="prog-bar">
+            {taskElementArray}
           </div>
+        </div>
       </div>
-     </div>
-   
-     
-      
+
+
+
     </div>
   )
 }

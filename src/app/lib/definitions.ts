@@ -4,8 +4,9 @@ export type Task = {
     id: string,
     name: string,
     description: string,
-    owner: User
-    height: number
+    owner: User,
+    height: number,
+    index: number,
 }
 
 export type TaskMap = {
@@ -47,6 +48,14 @@ export class Draggable implements iDraggable {
         let containerWidth: number = container.clientWidth; // width of containing box
         let containerHeight: number = container.clientHeight; // height of containing box
 
+        const leaveHandler = () => {
+            container.removeEventListener("mousemove", moveHandler as () => void);
+            const newPosition = this.stopMoving(container, divId);
+            if (newPosition) {
+                this.move(divId, containerWidth/2 - divWidth/2, this.originalPosition.y)
+            }
+        };
+
         const moveHandler   = (e:MouseEvent) => {
             let posX: number = e.clientX - containerBounds.left - divWidth/2; // mouse x position
             let posY: number = e.clientY - containerBounds.top - divHeight/2; // mouse y position
@@ -62,20 +71,32 @@ export class Draggable implements iDraggable {
             if (posY < 0){
                 posY = 0;
             }
-            
-            this.move(divId, posX, posY)
+            // if the mouse leaves the container
+            if (
+                e.clientX < containerBounds.left ||
+                e.clientX > containerBounds.right ||
+                e.clientY < containerBounds.top ||
+                e.clientY > containerBounds.bottom
+            ) {
+                leaveHandler();
+            } else {
+                this.move(divId, posX, posY);
+            }
         }
+
         const stopMovingHandler: EventListener = () => {
             container.removeEventListener("mousemove", moveHandler as () => void);
             container.removeEventListener("mouseup", stopMovingHandler);
+            container.removeEventListener("mouseleave", leaveHandler);
         }
-        
+  
         container.addEventListener("mousemove",moveHandler as () => void);
-        container.addEventListener("mouseup", stopMovingHandler)      
+        container.addEventListener("mouseup", stopMovingHandler) 
+        container.addEventListener("mouseleave", leaveHandler);
+        
         
     }
     stopMoving(container: HTMLDivElement, divId: HTMLDivElement): { newX: number; newY: number } | null {
- 
         const containerWidth= container.clientWidth
         const divWidth= divId.clientWidth
         const containerBounds = container.getBoundingClientRect();

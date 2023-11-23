@@ -1,30 +1,43 @@
 
 import { Task, Draggable  } from "../lib/definitions";
-export default function TaskRect({task, index, yPos, positionMap, switchTaskIndices, color}: {
+export default function TaskRect({
+    task, 
+    yPos, 
+    positionMap, 
+    switchTaskIndices, 
+    color,
+            }: {
     task: Task,
-    index: number,
     yPos: number,
-    positionMap: Map<number, number>,
+    positionMap: Map<number, [number, number]>,
     switchTaskIndices: (task: Task, oldIndex: number, newIndex: number) => void,
     color: string,
 }){
     
-   
     const draggableDiv = new Draggable();
-    
+    // in posMap: value[0] = yPos, value[1] = height
     const calculateNewIndex = (newPos: {newX: number, newY: number}): number =>{
-        let newIndex = index;
+        let newIndex = task.index;
         const BreakException = {};
-        const finalPos = positionMap.get(positionMap.size - 1)
-        if ( finalPos && newPos.newY > finalPos ) return (positionMap.size - 1) // check if moving all the wy to the end
+        const finalPosMapVal = positionMap.get(positionMap.size - 1)
+        if ( finalPosMapVal  && newPos.newY > finalPosMapVal[0]  ) return (positionMap.size - 1) // check if moving all the wy to the end
         try{
-            positionMap.forEach(function(value, key){
-             
-                if(newPos.newY < value){
-                    newIndex = key - 1;
-                    throw BreakException; // short foreach loop to get the first key
-                } 
-            })
+            if(newPos.newY > yPos){ // moving down
+                positionMap.forEach(function(value, key){
+                    if(newPos.newY + task.height > (value[0] + value[1])){// if the bottom of the selected task is below  the bottom of the mapped task bottom
+                        newIndex = key ; // keep setting until we find something its not below
+                    } 
+                })  
+            }
+            else{ // moving up
+                positionMap.forEach(function(value, key){
+                    if(newPos.newY <= value[0]){
+                        newIndex = key  ;
+                        throw BreakException; // short foreach loop to get the first key
+                    } 
+                })  
+            }
+           
         } catch(e){
             if (e!== BreakException){
                 throw e;
@@ -44,12 +57,12 @@ export default function TaskRect({task, index, yPos, positionMap, switchTaskIndi
                 thisDiv.style.zIndex = "0";
                 let newPos = draggableDiv.stopMoving(progBar, thisDiv)
                 thisDiv.removeEventListener("mouseup", stopMove)
-                let newIndex = index;
+                let newIndex = task.index;
                 if (newPos){
                      newIndex =  calculateNewIndex(newPos);
                 } 
               
-                 switchTaskIndices(task, index,newIndex);
+                 switchTaskIndices(task, task.index, newIndex);
                  
             };
             
@@ -80,7 +93,7 @@ export default function TaskRect({task, index, yPos, positionMap, switchTaskIndi
         className="task-rect" 
         data-open='false'
         onMouseDown={grabTask}
-        style={{"top" : yPos, "backgroundColor": color}}
+        style={{"top" : yPos, "backgroundColor": color, "height": task.height}}
         >
             {task.name}
         </div>
