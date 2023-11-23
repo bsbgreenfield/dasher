@@ -58,6 +58,9 @@ export default function Home() {
     and to supply each task element with the a new y position, which in turn is informed by the height and y position of the previes element
     first, we need to create a new Map<index, [yPosition, height]
     the, we create the element array using the new values stored in the Map
+
+    ----- This can probably be improved by lifting the state of posmap up to a common parent element.----
+      could move prog bar down into its own child
     **/
     const newTaskPosMap = new Map<number, [number, number]>()
     const newElementArray: React.JSX.Element[] = []; // initialize an empty array
@@ -68,21 +71,23 @@ export default function Home() {
       let taskAtIthPosition = tasksWithNewIndices.find(task => task.index == i)
       newTaskPosMap.set(i, [newYPos, taskAtIthPosition!.height])
 
-      let taskElement: React.JSX.Element =
-        <TaskRect
-          key={taskAtIthPosition!.id}
-          task={taskAtIthPosition!}
-          yPos={newYPos}
-          positionMap={} // this may be an issue as taskPosMap is not set at this point. Maybe it will update dynamically?
-          switchTaskIndices={switchTaskIndices}
-          color={colorArray[parseInt(taskAtIthPosition!.id)]}
-        />
-
-      newElementArray.push(taskElement);
-
       newYPos = newYPos + taskAtIthPosition!.height
     }
 
+    for(let i=0; i < tasksWithNewIndices.length; i ++){
+      let taskAtIthPosition = tasksWithNewIndices.find(task => task.index == i)
+      let taskElement: React.JSX.Element =
+      <TaskRect
+        key={taskAtIthPosition!.id}
+        task={taskAtIthPosition!}
+        yPos={newTaskPosMap.get(i)![0]}
+        positionMap={newTaskPosMap} // this may be an issue as taskPosMap is not set at this point. Maybe it will update dynamically?
+        switchTaskIndices={switchTaskIndices}
+        color={colorArray[parseInt(taskAtIthPosition!.id)]}
+      />
+
+    newElementArray.push(taskElement);
+    }
     setTaskElementArray(newElementArray);
 
   };
