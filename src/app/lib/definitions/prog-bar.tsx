@@ -8,24 +8,25 @@ export default class ProgressBar{
     private taskPosMapInit = new Map<number, [number, number]>([[0, [0, 50]], [1, [50, 100]], [2, [150, 200]]]);
     public posMap = useRef<Map<number, [number, number]>>(this.taskPosMapInit); // store the pos map in a ref so we can store changes without updating the tasks
     public tasksArray = useRef<Task[]>([dummyTasks[0], dummyTasks[1], dummyTasks[2]]);
-    constructor() {
+    private dispatchNewTaskElements;
+    constructor(dispatchNewTaskElements: Dispatch<{type: String, newState: React.JSX.Element[]}>) {
         this.switchTaskIndices = this.switchTaskIndices.bind(this);
+        this.dispatchNewTaskElements = dispatchNewTaskElements;
     }
 
-    reducer(state: any, action: {type: String, newState: any}){
-        switch(action.type){
-            case "tasks_updated": {
-                return action.newState
-            }
-        }
-    }
+   
     generateTaskArray(tasksWithNewIndices: Task[]): React.JSX.Element[] {
+        console.log(tasksWithNewIndices);
         this.updatePosMap(tasksWithNewIndices); // update map of the element postions based on the new indices
 
         const newElementArray: React.JSX.Element[] = this.genTaskElementArray(tasksWithNewIndices);
-
-        return newElementArray;
-
+        this.dispatchNewTaskElements(
+            {
+                type:"tasks_updated",
+                newState:newElementArray
+            });
+         
+            return newElementArray;
     };
 
      updatePosMap(tasks: Task[]) {

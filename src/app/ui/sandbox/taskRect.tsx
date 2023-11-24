@@ -7,17 +7,12 @@ export default function TaskRect({
     yPos, 
     positionMap, 
     switchTaskIndices,
-    dispatchNewTaskElements, 
     color,
             }: {
     task: Task,
     yPos: number,
     positionMap: Map<number, [number, number]>,
     switchTaskIndices: (task: Task, oldIndex: number, newIndex: number) => void,
-    dispatchNewTaskElements: Dispatch<{
-        type: String;
-        newState: any;
-    }>
     color: string,
 }){
     
@@ -69,11 +64,9 @@ export default function TaskRect({
                      newIndex =  calculateNewIndex(newPos);
                 } 
               
-                const newElementArray =  switchTaskIndices(task, task.index, newIndex);
-                dispatchNewTaskElements({
-                    type:"tasks_updated",
-                    newState: newElementArray
-            });
+                 switchTaskIndices(task, task.index, newIndex);
+                 
+            };
             
             thisDiv.addEventListener("mouseup", stopMove);
         }
