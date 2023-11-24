@@ -1,32 +1,3 @@
-import React, { MouseEvent } from "react";
-
-export type Task = {
-    id: string,
-    name: string,
-    description: string,
-    owner: User,
-    height: number,
-    index: number,
-}
-
-export type TaskMap = {
-    task: Task,
-    index: number,
-    yPos: number,
-}
-export type User = {
-    username: string,
-    role: Role
-}
-
-export enum Role {
-    developer, 
-    manager,
-    team_member, 
-    other,
-}
-
-
 export interface iDraggable {
     move(divId: HTMLDivElement, xPos: number, yPos: number): void;
     startMoving(divId: HTMLDivElement, container: HTMLDivElement, evt: React.MouseEvent, originalPos: {x: number, y: number}): void;
@@ -109,4 +80,3 @@ export class Draggable implements iDraggable {
     }
    
 }
-
