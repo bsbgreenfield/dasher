@@ -13,7 +13,11 @@ export default class ProgressBar{
         this.switchTaskIndices = this.switchTaskIndices.bind(this);
         this.dispatchNewTaskElements = dispatchNewTaskElements;
     }
-
+    displayNewTask = (createdTask: Task) => {
+        const newTasks: Task[] = [...this.tasksArray.current, createdTask];
+        this.tasksArray.current = newTasks;
+        this.generateTaskArray(newTasks);
+    }
    
     generateTaskArray(tasksWithNewIndices: Task[]): React.JSX.Element[] {
         console.log(tasksWithNewIndices);

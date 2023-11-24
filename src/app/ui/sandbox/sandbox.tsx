@@ -16,8 +16,18 @@ import ProgressBar from "@/app/lib/definitions/prog-bar";
 
 export default function Sandbox() {
 
-    const tasksArray = useRef<Task[]>([dummyTasks[0], dummyTasks[1], dummyTasks[2]])
+    let [taskElementArray, dispatchNewTaskElements] = useReducer(reducer, []);
+    const progressBar = new ProgressBar(dispatchNewTaskElements);
+
     const [formVisible, setFormVisible] = useState<boolean>(false)
+    const toggleForm = () => {
+        setFormVisible(!formVisible)
+    }
+
+    const tasksArrayInit = [dummyTasks[0], dummyTasks[1], dummyTasks[2]];
+    useEffect(() => {
+        progressBar.generateTaskArray(tasksArrayInit)
+    }, []);
 
     function reducer(state: any, action: { type: String, newState: any }) {
         switch (action.type) {
@@ -26,26 +36,7 @@ export default function Sandbox() {
             }
         }
     };
-
-    let [taskElementArray, dispatchNewTaskElements] = useReducer(reducer, []);
-    const progressBar = new ProgressBar(dispatchNewTaskElements);
-
-    useEffect(() => {
-        progressBar.generateTaskArray(tasksArray.current)
-    }, []);
-
-    const displayNewTask = (createdTask: Task) => {
-        const newTasks: Task[] = [...tasksArray.current, createdTask];
-        tasksArray.current = newTasks;
-        progressBar.tasksArray.current = newTasks;
-        progressBar.generateTaskArray(newTasks);
-    }
-
-    const toggleForm = () => {
-        setFormVisible(!formVisible)
-    }
-
-    // Flow: move task -> switchTaskIndices -> update tasks -> generate task element array -> render new task element array
+    
     return (
         <div>
             <div className="top-bar">
@@ -57,7 +48,7 @@ export default function Sandbox() {
                     {formVisible ? "Cancel" : "Create new Task"}
                 </div>
             </div>
-            <NewTaskForm toggleForm={toggleForm} displayNewTask={displayNewTask} formVisible={formVisible} />
+            <NewTaskForm toggleForm={toggleForm} displayNewTask={progressBar.displayNewTask} formVisible={formVisible} />
             <ProgBar taskElementArray={taskElementArray} />
         </div>
 
