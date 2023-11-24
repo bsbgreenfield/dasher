@@ -51,7 +51,7 @@ export default function Home() {
     setFormVisible(!formVisible)
   }
 
-  const generateTaskArray = (tasksWithNewIndices: Task[]): void => {
+  const generateTaskArray = (tasksWithNewIndices: Task[], newIndex: number = -1): void => {
     /* 
     we take in an array of tasks, which have specified indices.
     The goal is to create an array of task elements which is sorted based on these indices,
@@ -76,7 +76,8 @@ export default function Home() {
 
     for(let i=0; i < tasksWithNewIndices.length; i ++){
       let taskAtIthPosition = tasksWithNewIndices.find(task => task.index == i)
-      let taskElement: React.JSX.Element =
+      let taskElement: React.JSX.Element;
+      taskElement =
       <TaskRect
         key={taskAtIthPosition!.id}
         task={taskAtIthPosition!}
@@ -84,6 +85,7 @@ export default function Home() {
         positionMap={newTaskPosMap} // this may be an issue as taskPosMap is not set at this point. Maybe it will update dynamically?
         switchTaskIndices={switchTaskIndices}
         color={colorArray[parseInt(taskAtIthPosition!.id)]}
+        visible = {!(taskAtIthPosition!.index == newIndex)}
       />
 
     newElementArray.push(taskElement);
@@ -93,7 +95,7 @@ export default function Home() {
   };
 
 
-  const switchTaskIndices = (task: Task, oldIndex: number, newIndex: number) => {
+  const switchTaskIndices = (task: Task, oldIndex: number, newIndex: number, dynamicSwitchMode: boolean) => {
     const newTasks: Task[] = [];
     if (newIndex < 0) newIndex = 0; // im not sure why it does this.
     if (oldIndex == newIndex) return;
@@ -121,16 +123,18 @@ export default function Home() {
 
     tasks.current = newTasks;
 
-    generateTaskArray(newTasks)
+    dynamicSwitchMode ? generateTaskArray(newTasks, newIndex) : generateTaskArray(newTasks) 
   }
+
+  
   const tasks = useRef<Task[]>([testTask, testTask2, testTask3])
   const [formVisible, setFormVisible] = useState<boolean>(false)
 
   let [taskElementArray, setTaskElementArray] = useState<React.JSX.Element[]>(
     [
-      <TaskRect key={(testTask.id)} task={testTask} yPos={0} positionMap={taskPosMapInit} color="red" switchTaskIndices={switchTaskIndices} />,
-      <TaskRect key={(testTask2.id)} task={testTask2} yPos={50} positionMap={taskPosMapInit} color="blue" switchTaskIndices={switchTaskIndices} />,
-      <TaskRect key={(testTask3.id)} task={testTask3} yPos={150} positionMap={taskPosMapInit} color="yellow" switchTaskIndices={switchTaskIndices} />
+      <TaskRect key={(testTask.id)} task={testTask} yPos={0} positionMap={taskPosMapInit} color="red" switchTaskIndices={switchTaskIndices} visible={true}/>,
+      <TaskRect key={(testTask2.id)} task={testTask2} yPos={50} positionMap={taskPosMapInit} color="blue" switchTaskIndices={switchTaskIndices}  visible={true}/>,
+      <TaskRect key={(testTask3.id)} task={testTask3} yPos={150} positionMap={taskPosMapInit} color="yellow" switchTaskIndices={switchTaskIndices}  visible={true} />
     ]
   )
 

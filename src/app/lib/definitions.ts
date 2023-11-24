@@ -107,6 +107,14 @@ export class Draggable implements iDraggable {
         this.move(divId, containerWidth/2 - divWidth/2, this.originalPosition.y)
         return { newX, newY };
     }
+
+    getCurrentPosition(container :HTMLDivElement, divId: HTMLDivElement): { newX: number; newY: number } {
+        const containerBounds = container.getBoundingClientRect();
+        const divBounds = divId.getBoundingClientRect();
+        const newX = divBounds.left - containerBounds.left;
+        const newY = divBounds.top - containerBounds.top;
+        return { newX, newY };
+    }
    
 }
 
