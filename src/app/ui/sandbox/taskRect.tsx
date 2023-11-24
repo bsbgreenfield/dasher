@@ -1,9 +1,11 @@
 
-import { Task, Draggable } from "../lib/definitions";
+import {Task} from "../../lib/definitions/types";
+import {Draggable  } from "../../lib/definitions/task-rect";
+import { Dispatch } from "react";
 export default function TaskRect({
-    task,
-    yPos,
-    positionMap,
+    task, 
+    yPos, 
+    positionMap, 
     switchTaskIndices,
     color,
     visible
