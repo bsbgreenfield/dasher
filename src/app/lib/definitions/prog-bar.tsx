@@ -9,7 +9,10 @@ export default class ProgressBar{
     public posMap = useRef<Map<number, [number, number]>>(this.taskPosMapInit); // store the pos map in a ref so we can store changes without updating the tasks
     public tasksArray = useRef<Task[]>([dummyTasks[0], dummyTasks[1], dummyTasks[2]]);
     private dispatchNewTaskElements;
-    constructor(dispatchNewTaskElements: Dispatch<{type: String, newState: React.JSX.Element[]}>) {
+    public currentTaskElementArray: React.JSX.Element[] = [];
+    constructor(
+        dispatchNewTaskElements: Dispatch<{type: String, newState: React.JSX.Element[]}>,
+        ) {
         this.switchTaskIndices = this.switchTaskIndices.bind(this);
         this.dispatchNewTaskElements = dispatchNewTaskElements;
     }
@@ -20,20 +23,19 @@ export default class ProgressBar{
     }
    
     generateTaskArray(tasksWithNewIndices: Task[]): React.JSX.Element[] {
-        console.log(tasksWithNewIndices);
-        this.updatePosMap(tasksWithNewIndices); // update map of the element postions based on the new indices
-
+        const newTaskPosMap = this.getUpdatedPosMap(tasksWithNewIndices); // update map of the element postions based on the new indices
+        this.posMap.current = newTaskPosMap;
         const newElementArray: React.JSX.Element[] = this.genTaskElementArray(tasksWithNewIndices);
         this.dispatchNewTaskElements(
             {
                 type:"tasks_updated",
                 newState:newElementArray
             });
-         
+            this.currentTaskElementArray = newElementArray;
             return newElementArray;
     };
 
-     updatePosMap(tasks: Task[]) {
+     getUpdatedPosMap(tasks: Task[]): Map<number, [number, number]> {
         const newTaskPosMap = new Map<number, [number, number]>()
         let newYPos: number = 0; //initialize new position (pixels) for the first task element
 
@@ -44,7 +46,8 @@ export default class ProgressBar{
 
             newYPos = newYPos + taskAtIthPosition!.height
         }
-        this.posMap.current = newTaskPosMap;
+        return newTaskPosMap;
+       
     }
      genTaskElementArray(tasks: Task[]): React.JSX.Element[] {
         const newElementArray: React.JSX.Element[] = [];
@@ -54,7 +57,7 @@ export default class ProgressBar{
                 <TaskRect
                     key={taskAtIthPosition!.id}
                     task={taskAtIthPosition!}
-                    yPos={this.posMap.current.get(i)![0]}
+                    yPos={this.posMap.current.get(i)![0] + 10}
                     positionMap={this.posMap.current} // this may be an issue as taskPosMap is not set at this point. Maybe it will update dynamically?
                     switchTaskIndices={this.switchTaskIndices}
                     color={colorArray[parseInt(taskAtIthPosition!.id)]}
@@ -66,11 +69,17 @@ export default class ProgressBar{
         return newElementArray;
     }
 
-     switchTaskIndices(task: Task, oldIndex: number, newIndex: number): React.JSX.Element[] {
-        console.log(oldIndex, newIndex);
+     switchTaskIndices(oldIndex: number, newIndex: number): React.JSX.Element[] | null{
+       let newTasks = this.calculateNewTaskIndices(oldIndex, newIndex);
+
+        this.tasksArray.current = newTasks;
+
+        return this.generateTaskArray(newTasks)
+    }
+
+    calculateNewTaskIndices(oldIndex: number, newIndex: number): Task[]{
         const newTasks: Task[] = [];
         if (newIndex < 0) newIndex = 0; // im not sure why it does this.
-        /* if (oldIndex == newIndex) return; */                             /// figure this out!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
         const movingDown = (oldIndex < newIndex);
         for (let i = 0; i <= this.tasksArray.current.length - 1; i++) {
             let newTask = this.tasksArray.current[i]
@@ -83,7 +92,7 @@ export default class ProgressBar{
                 } // otherwise, the position should stay the same
 
             }
-            else { // if the task is moving up, everything at or below the new index needs to shift down
+            else if (!movingDown){ // if the task is moving up, everything at or below the new index needs to shift down
                 if (newTask.index >= newIndex && newTask.index <= oldIndex) { // also , if the task is below where the selected task started, do nothing
                     newTask.index = this.tasksArray.current[i].index + 1;
                 }
@@ -92,9 +101,6 @@ export default class ProgressBar{
 
             newTasks.push(newTask);
         }
-
-        this.tasksArray.current = newTasks;
-
-        return this.generateTaskArray(newTasks)
+        return newTasks;
     }
 }

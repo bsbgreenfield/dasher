@@ -36,7 +36,7 @@ export default function Sandbox() {
             }
         }
     };
-    
+
     return (
         <div>
             <div className="top-bar">

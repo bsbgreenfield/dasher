@@ -1,7 +1,6 @@
 
 import {Task} from "../../lib/definitions/types";
 import {Draggable  } from "../../lib/definitions/task-rect";
-import { Dispatch } from "react";
 export default function TaskRect({
     task, 
     yPos, 
@@ -12,10 +11,11 @@ export default function TaskRect({
     task: Task,
     yPos: number,
     positionMap: Map<number, [number, number]>,
-    switchTaskIndices: (task: Task, oldIndex: number, newIndex: number) => void,
+    switchTaskIndices: (oldIndex: number, newIndex: number) => React.JSX.Element[] | null,
     color: string,
 }){
-    
+
+    let dragged: boolean = false;
     const draggableDiv = new Draggable();
     // in posMap: value[0] = yPos, value[1] = height
     const calculateNewIndex = (newPos: {newX: number, newY: number}): number =>{
@@ -33,8 +33,8 @@ export default function TaskRect({
             }
             else{ // moving up
                 positionMap.forEach(function(value, key){
-                    if(newPos.newY <= value[0]){
-                        newIndex = key  ;
+                    if(newPos.newY < value[0] - (value[1]/2)){
+                        newIndex = key -1  ;
                         throw BreakException; // short foreach loop to get the first key
                     } 
                 })  
@@ -45,8 +45,6 @@ export default function TaskRect({
                 throw e;
             }
         }
-       
-       
         return newIndex
     }
     const grabTask = async (evt: React.MouseEvent) => {
@@ -54,8 +52,9 @@ export default function TaskRect({
         const progBar = thisDiv.parentElement as HTMLDivElement;
         if(thisDiv){
             thisDiv.style.zIndex = "5";
-            draggableDiv.startMoving(thisDiv, thisDiv.parentElement as HTMLDivElement, evt, {x: 0, y: yPos});
+            draggableDiv.startMoving(thisDiv, thisDiv.parentElement as HTMLDivElement, {x: 0, y: yPos});
             const stopMove = () => {
+                thisDiv.removeEventListener("mousemove", activePostion);
                 thisDiv.style.zIndex = "0";
                 let newPos = draggableDiv.stopMoving(progBar, thisDiv)
                 thisDiv.removeEventListener("mouseup", stopMove)
@@ -64,12 +63,25 @@ export default function TaskRect({
                      newIndex =  calculateNewIndex(newPos);
                 } 
               
-                 switchTaskIndices(task, task.index, newIndex);
-                 
+                const newElementArray = switchTaskIndices(task.index, newIndex);
+                positionMap = newElementArray![newIndex].props.positionMap;
+                yPos = newElementArray![newIndex].props.yPos.toString();
+                draggableDiv.move(thisDiv, progBar.clientWidth/2 - thisDiv.clientWidth/2, yPos)
+                dragged = false;
             };
-            
+            const activePostion = () =>{
+                if(!dragged){
+                    let newPos = draggableDiv.stopMoving(progBar, thisDiv);
+                    let currIndex = calculateNewIndex(newPos!) 
+                    if( currIndex !== task.index){
+                       switchTaskIndices(task.index, currIndex)
+                    }
+                }
+            }
             thisDiv.addEventListener("mouseup", stopMove);
+            thisDiv.addEventListener("mousemove", activePostion)
         }
+
     }
     const viewDetails = (event: React.MouseEvent) => {
 
