@@ -18,14 +18,14 @@ const user1: User = {
         name: "second",
         description: "This is a another test description",
         owner: user1,
-        height: 50, index: 1
+        height: 150, index: 1
       },
       {
         id: "2",
         name: "third",
         description: "This is a third test description!!",
         owner: user1,
-        height: 50, index: 2
+        height: 200, index: 2
       }
   ]
 

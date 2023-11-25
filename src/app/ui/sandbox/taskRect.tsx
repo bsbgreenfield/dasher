@@ -33,8 +33,9 @@ export default function TaskRect({
             }
             else{ // moving up
                 positionMap.forEach(function(value, key){
-                    if(newPos.newY < value[0] - (value[1]/2)){
-                        newIndex = key -1  ;
+                    if(newPos.newY < (value[0] + 5)){
+                        console.log(`${newPos.newY} < ${value[0]}`)
+                        newIndex = key ;
                         throw BreakException; // short foreach loop to get the first key
                     } 
                 })  
@@ -50,9 +51,10 @@ export default function TaskRect({
     const grabTask = async (evt: React.MouseEvent) => {
         const thisDiv = document.getElementById(task.id) as HTMLDivElement;
         const progBar = thisDiv.parentElement as HTMLDivElement;
+        let containerBounds = progBar.getBoundingClientRect();
         if(thisDiv){
             thisDiv.style.zIndex = "5";
-            draggableDiv.startMoving(thisDiv, thisDiv.parentElement as HTMLDivElement, {x: 0, y: yPos});
+            draggableDiv.startMoving(thisDiv, thisDiv.parentElement as HTMLDivElement, {xPos: 0, yPos: yPos});
             const stopMove = () => {
                 thisDiv.removeEventListener("mousemove", activePostion);
                 thisDiv.style.zIndex = "0";
@@ -62,19 +64,22 @@ export default function TaskRect({
                 if (newPos){
                      newIndex =  calculateNewIndex(newPos);
                 } 
-              
                 const newElementArray = switchTaskIndices(task.index, newIndex);
                 positionMap = newElementArray![newIndex].props.positionMap;
                 yPos = newElementArray![newIndex].props.yPos.toString();
-                draggableDiv.move(thisDiv, progBar.clientWidth/2 - thisDiv.clientWidth/2, yPos)
+                draggableDiv.move(thisDiv, progBar.clientWidth/2 - thisDiv.clientWidth/2, yPos);
                 dragged = false;
             };
-            const activePostion = () =>{
-                if(!dragged){
+            const activePostion = (e: MouseEvent) =>{
+                if(!dragged){ 
+                    thisDiv.style.zIndex = "5";
                     let newPos = draggableDiv.stopMoving(progBar, thisDiv);
-                    let currIndex = calculateNewIndex(newPos!) 
+                    let currIndex = calculateNewIndex(newPos!);
                     if( currIndex !== task.index){
-                       switchTaskIndices(task.index, currIndex)
+                        const newElementArray = switchTaskIndices(task.index, currIndex);
+                        positionMap = newElementArray![currIndex].props.positionMap;
+                        yPos = newElementArray![currIndex].props.yPos.toString();
+                        dragged = false;
                     }
                 }
             }

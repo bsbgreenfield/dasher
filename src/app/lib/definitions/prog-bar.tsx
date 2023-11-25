@@ -57,7 +57,7 @@ export default class ProgressBar{
                 <TaskRect
                     key={taskAtIthPosition!.id}
                     task={taskAtIthPosition!}
-                    yPos={this.posMap.current.get(i)![0] + 10}
+                    yPos={this.posMap.current.get(i)![0]}
                     positionMap={this.posMap.current} // this may be an issue as taskPosMap is not set at this point. Maybe it will update dynamically?
                     switchTaskIndices={this.switchTaskIndices}
                     color={colorArray[parseInt(taskAtIthPosition!.id)]}
