@@ -48,10 +48,9 @@ export default function TaskRect({
         }
         return newIndex
     }
-    const grabTask = async (evt: React.MouseEvent) => {
+    const grabTask = async () => {
         const thisDiv = document.getElementById(task.id) as HTMLDivElement;
         const progBar = thisDiv.parentElement as HTMLDivElement;
-        let containerBounds = progBar.getBoundingClientRect();
         if(thisDiv){
             thisDiv.style.zIndex = "5";
             draggableDiv.startMoving(thisDiv, thisDiv.parentElement as HTMLDivElement, {xPos: 0, yPos: yPos});
