@@ -17,6 +17,7 @@ import ProgBar from "./progBar";
 export default function Sandbox() {
     const progMapInit = new Map<string, Task[]>();
     progMapInit.set("a", [dummyTasks[0], dummyTasks[1], dummyTasks[2]]);
+    progMapInit.set("b", [dummyTasks[3], dummyTasks[4], dummyTasks[5]]);
     const progBarsMap = useRef<Map<string, Task[]>>(progMapInit);
 
     function addTask(progBarId: string, task: Task){
@@ -71,7 +72,11 @@ export default function Sandbox() {
                     {formVisible ? "Cancel" : "Create new Task"}
                 </div>
             </div>
-            <ProgBar id={"a"} tasks={progBarsMap.current.get("a") || [] }  addTask={addTask} switchTaskIndices={switchTaskIndices} />
+            <div style={{"display": "flex"}}>
+                <ProgBar id={"a"} tasks={progBarsMap.current.get("a") || [] }  addTask={addTask} switchTaskIndices={switchTaskIndices} />
+                <ProgBar id={"b"} tasks={progBarsMap.current.get("b") || [] }  addTask={addTask} switchTaskIndices={switchTaskIndices} />
+            </div>
+           
         </div>
 
     )

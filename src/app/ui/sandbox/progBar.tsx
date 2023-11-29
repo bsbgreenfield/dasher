@@ -1,6 +1,7 @@
 import { Task, ProgBarTask } from "@/app/lib/definitions/types";
 import { useEffect, useRef, useState } from "react"
 import TaskRect from "./taskRect";
+import { colorArray } from "@/app/data/dummy_data";
 
 export default function ProgBar({tasks, id, addTask, switchTaskIndices} : {
   tasks:  Task[] | [], 
@@ -57,6 +58,7 @@ function doTaskSwap(oldIndex: number, newIndex: number): Map<number, [number, nu
     return newTaskPosMap;
    
 }
+const colorsArray = ['red', "blue", "yellow"]
 
     return (
         <div className="sandbox-body">
@@ -70,7 +72,7 @@ function doTaskSwap(oldIndex: number, newIndex: number): Map<number, [number, nu
              height = {task.height}
              positionMap={task.positionMap}
              swap={doTaskSwap}
-             color="red"
+             color={colorsArray[parseInt(task.id.split('-').pop()!)]}
               />)
             : <></>}
           </div>
