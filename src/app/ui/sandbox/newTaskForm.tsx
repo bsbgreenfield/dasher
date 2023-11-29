@@ -1,5 +1,5 @@
-import { Task } from "../lib/definitions"
-import { createTask } from "../lib/actions";
+import { Task } from "../../lib/definitions/types"
+import { createTask } from "../../lib/actions";
 
 export default function NewTaskForm(
     { 

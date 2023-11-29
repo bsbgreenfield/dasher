@@ -1,9 +1,17 @@
 .task-rect{
     border: 1px solid black;
-    width: min-content;
-    padding: 10px;
+    width: 120px;
+    text-align: center;
+    background-color: rgb(103, 221, 60);
+    border-radius: 5px;
+    position: absolute;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -o-user-select: none;
+    -ms-user-select: none;
+    -khtml-user-select: none;
+    user-select: none;
 }
 .task-rect:hover{
     cursor: pointer;
-    transform: scale(1.1);
 }
