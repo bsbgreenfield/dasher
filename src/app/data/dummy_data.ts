@@ -7,21 +7,21 @@ const user1: User = {
   const colorArray: string[] = ["red", "blue", "yellow"];
   const dummyTasks : Task[]  = [
     {
-        id: "0",
+        id: "a-0",
         name: "first",
         description: "This is a test description",
         owner: user1,
         height: 50, index: 0
       },
       {
-        id: "1",
+        id: "a-1",
         name: "second",
         description: "This is a another test description",
         owner: user1,
         height: 150, index: 1
       },
       {
-        id: "2",
+        id: "a-2",
         name: "third",
         description: "This is a third test description!!",
         owner: user1,

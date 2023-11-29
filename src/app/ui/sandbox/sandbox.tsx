@@ -12,31 +12,54 @@ import { colorArray, dummyTasks } from "@/app/data/dummy_data";
 import { Task } from "@/app/lib/definitions/types";
 import NewTaskForm from "./newTaskForm";
 import ProgBar from "./progBar";
-import ProgressBar from "@/app/lib/definitions/prog-bar";
+
 
 export default function Sandbox() {
+    const progMapInit = new Map<string, Task[]>();
+    progMapInit.set("a", [dummyTasks[0], dummyTasks[1], dummyTasks[2]]);
+    const progBarsMap = useRef<Map<string, Task[]>>(progMapInit);
 
-    let [taskElementArray, dispatchNewTaskElements] = useReducer(reducer, []);
-    const progressBar = new ProgressBar(dispatchNewTaskElements);
+    function addTask(progBarId: string, task: Task){
+        const newProgBarMap = progBarsMap;
+        const newTaskArray = [...progBarsMap.current.get(progBarId)!, task];
+        newProgBarMap.current.set(progBarId, newTaskArray);
+    }
+
+    function switchTaskIndices(oldIndex: number, newIndex: number, progBarId: string): Task[]{
+       console.log(`switching ${oldIndex} to ${newIndex}`)
+        const newTasks: Task[] = [];
+        const progBarTasks: Task[] = progBarsMap.current.get(progBarId)!
+        if (newIndex < 0) newIndex = 0; // im not sure why it does 
+        const movingDown = (oldIndex < newIndex);
+        for (let i = 0; i < progBarTasks.length; i++) {
+            let newTask = progBarTasks[i];
+            if (newTask.index == oldIndex) { // if this is the selected task, move it to its new position
+                newTask.index = newIndex
+            }
+            else if (movingDown) {
+                if (newTask.index <= newIndex && newTask.index >= oldIndex) { // if the task is moving down, everything at or above the new index needs to shift upwards
+                    newTask.index = progBarTasks[i].index - 1;                // also, if the task is above where the moving task started, do nothing
+                } // otherwise, the position should stay the same
+    
+            }
+            else if (!movingDown){ // if the task is moving up, everything at or below the new index needs to shift down
+                if (newTask.index >= newIndex && newTask.index <= oldIndex) { // also , if the task is below where the selected task started, do nothing
+                    newTask.index = progBarTasks[i].index + 1;
+                }
+                // everything above the new index can stay where is was
+            }
+    
+            newTasks.push(newTask);
+        }
+        progBarsMap.current.set(progBarId, newTasks)
+        return newTasks;
+    }
 
     const [formVisible, setFormVisible] = useState<boolean>(false)
     const toggleForm = () => {
         setFormVisible(!formVisible)
     }
-
-    const tasksArrayInit = [dummyTasks[0], dummyTasks[1], dummyTasks[2]];
-    useEffect(() => {
-        progressBar.generateTaskArray(tasksArrayInit)
-    }, []);
-
-    function reducer(state: any, action: { type: String, newState: any }) {
-        switch (action.type) {
-            case "tasks_updated": {
-                return action.newState
-            }
-        }
-    };
-
+  
     return (
         <div>
             <div className="top-bar">
@@ -48,8 +71,7 @@ export default function Sandbox() {
                     {formVisible ? "Cancel" : "Create new Task"}
                 </div>
             </div>
-            <NewTaskForm toggleForm={toggleForm} displayNewTask={progressBar.displayNewTask} formVisible={formVisible} />
-            <ProgBar taskElementArray={taskElementArray} />
+            <ProgBar id={"a"} tasks={progBarsMap.current.get("a") || [] }  addTask={addTask} switchTaskIndices={switchTaskIndices} />
         </div>
 
     )

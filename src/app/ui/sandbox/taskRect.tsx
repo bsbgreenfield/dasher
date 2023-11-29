@@ -4,39 +4,49 @@ import {Draggable  } from "../../lib/definitions/task-rect";
 export default function TaskRect({
     task, 
     yPos, 
-    positionMap, 
-    switchTaskIndices,
+    height,
+    positionMap,
+    swap,
     color,
             }: {
     task: Task,
     yPos: number,
-    positionMap: Map<number, [number, number]>,
-    switchTaskIndices: (oldIndex: number, newIndex: number) => React.JSX.Element[] | null,
+    height: number,
+    positionMap: Map<number, [number, number]>
+    swap: (oldIndex: number, newIndex: number) => Map<number, [number, number]>,
     color: string,
 }){
-
     let dragged: boolean = false;
     const draggableDiv = new Draggable();
     // in posMap: value[0] = yPos, value[1] = height
+
+    function TID(fullId: string): number { // "Task ID"
+        return parseInt(fullId.split('-').pop()!);
+    }
     const calculateNewIndex = (newPos: {newX: number, newY: number}): number =>{
         let newIndex = task.index;
         const BreakException = {};
-        const finalPosMapVal = positionMap.get(positionMap.size - 1)
-        if ( finalPosMapVal  && newPos.newY > finalPosMapVal[0]  ) return (positionMap.size - 1) // check if moving all the wy to the end
         try{
-            if(newPos.newY > yPos){ // moving down
+            if(newPos.newY > yPos ){ // moving down
                 positionMap.forEach(function(value, key){
-                    if(newPos.newY + task.height > (value[0] + value[1])){// if the bottom of the selected task is below  the bottom of the mapped task bottom
-                        newIndex = key ; // keep setting until we find something its not below
-                    } 
+                    if(value[0] > yPos){ // only valid if other div started below selected div
+                        if((newPos.newY + task.height > (value[0] + value[1]))){// if the bottom of the selected task is below  the bottom of the mapped task bottom
+                            console.log(`${newPos.newY + task.height} is greater than ${value[0] + value[1]}`)
+                            newIndex = key; // keep setting until we find something its not below
+                            
+                        } 
+                    }
                 })  
             }
             else{ // moving up
                 positionMap.forEach(function(value, key){
-                    if(newPos.newY < (value[0] + 5)){
-                        console.log(`${newPos.newY} < ${value[0]}`)
-                        newIndex = key ;
-                        throw BreakException; // short foreach loop to get the first key
+                    if(value[0]< yPos){ // only valid if the other div started above selected div
+                        console.log(`${key} started above ${yPos}`)
+                        if((newPos.newY < (value[0] + 5))){
+                            newIndex = key;
+                            console.log(`new index of ${task.id} is ${key}`)
+                            throw BreakException; // short foreach loop to get the first key
+                    }
                     } 
                 })  
             }
@@ -52,32 +62,29 @@ export default function TaskRect({
         const thisDiv = document.getElementById(task.id) as HTMLDivElement;
         const progBar = thisDiv.parentElement as HTMLDivElement;
         if(thisDiv){
-            thisDiv.style.zIndex = "5";
+            thisDiv.style.zIndex = "40";
             draggableDiv.startMoving(thisDiv, thisDiv.parentElement as HTMLDivElement, {xPos: 0, yPos: yPos});
             const stopMove = () => {
                 thisDiv.removeEventListener("mousemove", activePostion);
                 thisDiv.style.zIndex = "0";
-                let newPos = draggableDiv.stopMoving(progBar, thisDiv)
+                let newPos = draggableDiv.stopMoving(progBar, thisDiv);
                 thisDiv.removeEventListener("mouseup", stopMove)
-                let newIndex = task.index;
-                if (newPos){
-                     newIndex =  calculateNewIndex(newPos);
-                } 
-                const newElementArray = switchTaskIndices(task.index, newIndex);
-                positionMap = newElementArray![newIndex].props.positionMap;
-                yPos = newElementArray![newIndex].props.yPos.toString();
-                draggableDiv.move(thisDiv, progBar.clientWidth/2 - thisDiv.clientWidth/2, yPos);
+                
+                
+                let newIndex =  calculateNewIndex(newPos!);
+                
+                const newPosArray = swap(task.index, newIndex);
+                draggableDiv.move(thisDiv, progBar.clientWidth/2 - thisDiv.clientWidth/2, newPosArray.get(task.index)![0]);
                 dragged = false;
             };
             const activePostion = (e: MouseEvent) =>{
                 if(!dragged){ 
                     thisDiv.style.zIndex = "5";
                     let newPos = draggableDiv.stopMoving(progBar, thisDiv);
-                    let currIndex = calculateNewIndex(newPos!);
-                    if( currIndex !== task.index){
-                        const newElementArray = switchTaskIndices(task.index, currIndex);
-                        positionMap = newElementArray![currIndex].props.positionMap;
-                        yPos = newElementArray![currIndex].props.yPos.toString();
+                    let newIndex = calculateNewIndex(newPos!);
+                    if( newIndex !== task.index){
+                        swap(task.index, newIndex);
+                        task.index = newIndex;
                         dragged = false;
                     }
                 }
@@ -111,7 +118,11 @@ export default function TaskRect({
         className="task-rect" 
         data-open='false'
         onMouseDown={grabTask}
-        style={{"top" : yPos, "backgroundColor": color, "height": task.height}}
+        style={
+            {"top" : yPos, 
+            "backgroundColor": color, 
+            "height": height}
+        }
         >
             {task.name}
         </div>

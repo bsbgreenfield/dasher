@@ -8,7 +8,16 @@ export type Task = {
     height: number,
     index: number,
 }
-
+export type ProgBarTask = {
+    id: string, 
+    name: string, 
+    description: string,
+    owner: User,
+    height: number,
+    yPos: number,
+    positionMap: Map<number, [number, number]>
+    index: number,
+}
 export type TaskMap = {
     task: Task,
     index: number,
