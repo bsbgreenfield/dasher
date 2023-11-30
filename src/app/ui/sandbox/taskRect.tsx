@@ -1,16 +1,16 @@
 
 import {Task} from "../../lib/definitions/types";
-import {Draggable  } from "../../lib/definitions/draggable";
+import {Draggable  } from "../../lib/definitions/task-rect";
 export default function TaskRect({
     task, 
-    yPos, 
+    pos, 
     height,
     positionMap,
     swap,
     color,
             }: {
     task: Task,
-    yPos: number,
+    pos: {xPos: number, yPos: number},
     height: number,
     positionMap: Map<number, [number, number]>
     swap: (oldIndex: number, newIndex: number) => Map<number, [number, number]>,
@@ -29,9 +29,6 @@ export default function TaskRect({
             }
             else{
                 if(task.index > key && newPos.newY < value[0] + 5){
-                    console.log(`${task.index} > ${key}`)
-                    console.log(`${newPos.newY}  < ${value[0] + 5}`)
-                    console.log(positionMap)
                     newIndex = key;
                 }
             }
@@ -39,12 +36,12 @@ export default function TaskRect({
         return newIndex
     }
     const grabTask = async () => {
-        let y = yPos;
+        let x= pos.xPos; let y = pos.yPos;
         const thisDiv = document.getElementById(task.id) as HTMLDivElement;
         const progBar = thisDiv.parentElement as HTMLDivElement;
         if(thisDiv){
             thisDiv.style.zIndex = "40";
-            draggableDiv.startMoving(thisDiv, thisDiv.parentElement as HTMLDivElement, {xPos: 0, yPos: yPos});
+            draggableDiv.startMoving(thisDiv, thisDiv.parentElement as HTMLDivElement, pos);
             const stopMove = () => {
                 thisDiv.removeEventListener("mousemove", activePostion);
                 thisDiv.style.zIndex = "0";
@@ -101,7 +98,7 @@ export default function TaskRect({
         data-open='false'
         onMouseDown={grabTask}
         style={
-            {"top" : yPos, 
+            {"top" : pos.yPos, 
             "backgroundColor": color, 
             "height": height}
         }

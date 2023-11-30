@@ -14,7 +14,7 @@ export type ProgBarTask = {
     description: string,
     owner: User,
     height: number,
-    yPos: number,
+    pos: {xPos: number, yPos: number },
     positionMap: Map<number, [number, number]>
     index: number,
 }

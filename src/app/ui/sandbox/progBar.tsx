@@ -4,7 +4,7 @@ import TaskRect from "./taskRect";
 import { colorArray } from "@/app/data/dummy_data";
 import NewTaskForm from "./newTaskForm";
 import { createTask } from "@/app/lib/actions";
-
+import RotateSVG from "./svg";
 export default function ProgBar({tasks, id, addTask, switchTaskIndices} : {
   tasks:  Task[] | [], 
   id: string,
@@ -23,21 +23,23 @@ export default function ProgBar({tasks, id, addTask, switchTaskIndices} : {
 
     function getProgBarTasks(tasks:Task[]): ProgBarTask[]{
       let newPosMap = getUpdatedPosMap(tasks)
-      let yPos = 0;
+      let pos= {xPos: 0, yPos: 0};
       let progBarTaskArray : ProgBarTask[]= [];
       for (let i = 0; i < tasks.length; i++){
         let taskAtIthPosition = tasks.find(task => task.index == i);
+        console.log(taskAtIthPosition)
         progBarTaskArray.push({
           id: taskAtIthPosition!.id,
           name: taskAtIthPosition!.name,
           description: taskAtIthPosition!.description,
           owner: taskAtIthPosition!.owner,
           height: taskAtIthPosition!.height,
-          yPos: yPos,
+          pos: {xPos: 0, yPos: newPosMap.get(i)![0]},
           positionMap: newPosMap,
           index: taskAtIthPosition!.index 
         })
-        yPos = yPos + taskAtIthPosition!.height
+        pos.yPos = pos.yPos + taskAtIthPosition!.height
+        pos.xPos = pos.xPos + taskAtIthPosition!.height
       }
       return progBarTaskArray;
     }
@@ -73,13 +75,19 @@ const colorsArray = ['red', "blue", "yellow"]
 
     return (
         <div className="sandbox-body">
+          <div className="progbar-top">
+            <RotateSVG/>
+              <div className="add-task-button" onClick={()=>{setFormVisible(!formVisible)}}>
+                {formVisible ? "-": "+"}
+              </div>
+            </div>
         <div className="sandbox-body-content">
           <div className="prog-bar">
             {progBarTasks ?
             progBarTasks!.map(task => <TaskRect
             key={task.id}
              task={task}
-             yPos={task.yPos}
+             pos={task.pos}
              height = {task.height}
              positionMap={task.positionMap}
              swap={doTaskSwap}
@@ -88,9 +96,7 @@ const colorsArray = ['red', "blue", "yellow"]
             : <></>}
           </div>
         </div>
-        <div className="add-task-button" onClick={()=>{setFormVisible(!formVisible)}}>
-          {formVisible ? "-": "+"}
-        </div>
+       
         <NewTaskForm formVisible={formVisible} id={`${id}-${tasks.length}`} submitTask={submitTask}/>
       </div>
     ) 
