@@ -1,14 +1,25 @@
 import { Task, ProgBarTask } from "@/app/lib/definitions/types";
-import { useEffect, useRef, useState } from "react"
+import { useEffect, useState } from "react"
 import TaskRect from "./taskRect";
 import { colorArray } from "@/app/data/dummy_data";
+import NewTaskForm from "./newTaskForm";
+import { createTask } from "@/app/lib/actions";
 
 export default function ProgBar({tasks, id, addTask, switchTaskIndices} : {
   tasks:  Task[] | [], 
   id: string,
-  addTask : (id: string, task: Task) => void
+  addTask : (id: string, task: Task) => Task[]
   switchTaskIndices: (oldIndex: number, newIndex: number, progBarId: string) => Task[]
 }){
+
+    async function submitTask(formdata: FormData){
+     let newTask =  await createTask(formdata)
+     const newTaskArray = addTask(id, newTask)
+     setProgBarTasks(getProgBarTasks(newTaskArray));
+     setFormVisible(false);
+    }
+    const [formVisible, setFormVisible] = useState(false)
+
 
     function getProgBarTasks(tasks:Task[]): ProgBarTask[]{
       let newPosMap = getUpdatedPosMap(tasks)
@@ -77,6 +88,10 @@ const colorsArray = ['red', "blue", "yellow"]
             : <></>}
           </div>
         </div>
+        <div className="add-task-button" onClick={()=>{setFormVisible(!formVisible)}}>
+          {formVisible ? "-": "+"}
+        </div>
+        <NewTaskForm formVisible={formVisible} id={`${id}-${tasks.length}`} submitTask={submitTask}/>
       </div>
-    )
+    ) 
 }

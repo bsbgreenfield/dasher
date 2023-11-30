@@ -1,29 +1,22 @@
 import { Task } from "../../lib/definitions/types"
-import { createTask } from "../../lib/actions";
 
-export default function NewTaskForm(
-    { 
-        toggleForm,
-        displayNewTask,
-        formVisible 
-    }: {
-        toggleForm: (arg0: boolean) => void,
-        displayNewTask: (arg0: Task) => void, 
-        formVisible: boolean 
-    }) {
-    const createTaskOnPage = async (formData: FormData) => {
-        const createdTask: Task = await createTask(formData);
-        toggleForm(false);
-        displayNewTask(createdTask);
-    }
+
+export default function NewTaskForm({
+    formVisible, id, submitTask}: 
+    {formVisible: boolean, id:string, submitTask: (formdata: FormData) => void}) {
 
     return (<form
-        style={{ "display": formVisible ? "block" : "none" }}
+        style={{"display": formVisible ? "block": "none"}}
         className="task-form"
-        action={createTaskOnPage}
+        action={submitTask}
     >
         <div className="task-form-grid">
-
+            <input
+             type="hidden" 
+             value={id}
+             id="task_id"
+             name="task_id"
+             />
             <label htmlFor="task_name">
                 Name:
             </label>

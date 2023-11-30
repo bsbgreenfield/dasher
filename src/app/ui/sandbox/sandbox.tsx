@@ -20,10 +20,11 @@ export default function Sandbox() {
     progMapInit.set("b", [dummyTasks[3], dummyTasks[4], dummyTasks[5]]);
     const progBarsMap = useRef<Map<string, Task[]>>(progMapInit);
 
-    function addTask(progBarId: string, task: Task){
+    function addTask(progBarId: string, task: Task): Task[]{
         const newProgBarMap = progBarsMap;
         const newTaskArray = [...progBarsMap.current.get(progBarId)!, task];
         newProgBarMap.current.set(progBarId, newTaskArray);
+        return newTaskArray
     }
 
     function switchTaskIndices(oldIndex: number, newIndex: number, progBarId: string): Task[]{

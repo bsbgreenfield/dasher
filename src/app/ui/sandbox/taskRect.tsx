@@ -1,6 +1,6 @@
 
 import {Task} from "../../lib/definitions/types";
-import {Draggable  } from "../../lib/definitions/task-rect";
+import {Draggable  } from "../../lib/definitions/draggable";
 export default function TaskRect({
     task, 
     yPos, 
@@ -19,15 +19,11 @@ export default function TaskRect({
     const draggableDiv = new Draggable();
     // in posMap: value[0] = yPos, value[1] = height
 
-    function TID(fullId: string): number { // "Task ID"
-        return parseInt(fullId.split('-').pop()!);
-    }
     const calculateNewIndex = (newPos: {newX: number, newY: number}, movingDown: boolean): number =>{
         let newIndex = task.index;
-        const BreakException = {};
         positionMap.forEach((value, key) => {
             if(movingDown){
-                if ( task.index < key && newPos.newY > value[0]){
+                if ( task.index < key && newPos.newY + height > value[0] + value[1]){
                     newIndex = key;
                 }
             }
@@ -40,32 +36,6 @@ export default function TaskRect({
                 }
             }
         })
-     /*    try{
-            if(newPos.newY > yPos ){ // moving down
-                positionMap.forEach(function(value, key){
-                    if(value[0] > yPos){ // only valid if other div started below selected div
-                        if((newPos.newY + task.height > (value[0] + value[1]))){// if the bottom of the selected task is below  the bottom of the mapped task bottom
-                            newIndex = key; // keep setting until we find something its not below
-                            
-                        } 
-                    }
-                })  
-            }
-            else{ // moving up
-                positionMap.forEach(function(value, key){
-                        if((newPos.newY < (value[0] + 5))){
-                            newIndex = key;
-                            throw BreakException; // short foreach loop to get the first key
-                    }
-                    
-                })  
-            }
-           
-        } catch(e){
-            if (e!== BreakException){
-                throw e;
-            }
-        } */
         return newIndex
     }
     const grabTask = async () => {

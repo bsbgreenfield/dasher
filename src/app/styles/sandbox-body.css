@@ -6,8 +6,8 @@
 }
 .sandbox-body{
     display: flex;
-    justify-content: center;
-
+    flex-direction: column;
+    align-items: center;
 }
 
 .prog-bar{
@@ -18,4 +18,21 @@
     align-items: center;
     border: 1px solid black;
     width: 200px;
+}
+.add-task-button{
+    display: flex;
+    text-align: center;
+    border: 1px solid black;
+    width: 80px;
+    font-size: 35px;
+    height: 35px;
+    justify-content: center;
+    align-items: center;
+    background-color: aliceblue;
+    user-select: none;
+
+}
+.add-task-button:hover{
+    cursor: pointer;
+    background-color: aquamarine;
 }
