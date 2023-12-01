@@ -1,5 +1,5 @@
 'use server';
-import {z} from 'zod';
+import {number, z} from 'zod';
 import {User, Role, Task} from "./definitions/types";
 
 
@@ -12,13 +12,14 @@ const taskSchema = z.object({
 
 const CreateTask = taskSchema.omit({owner:true});
 
-export async function createTask(formData: FormData){
+export async function createTask(formData: FormData, taskId: string){
     const {id, name, description} = CreateTask.parse({
-        id: "a-3",
+        id: taskId,
         name: formData.get("task_name"),
         description: formData.get("task_desc"),
     });
     const owner: User =  {username: "Benji", role: Role.developer};
-    const createdTask: Task = {id, name, description, owner, index: 3, height: 50};
+    const newIndex : number  = parseInt(taskId.split('-').pop()!)
+    const createdTask: Task = {id, name, description, owner, index: newIndex, size: 50};
     return createdTask;
 }

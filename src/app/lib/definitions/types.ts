@@ -5,7 +5,7 @@ export type Task = {
     name: string,
     description: string,
     owner: User,
-    height: number,
+    size: number,
     index: number,
 }
 export type ProgBarTask = {
@@ -13,7 +13,7 @@ export type ProgBarTask = {
     name: string, 
     description: string,
     owner: User,
-    height: number,
+    size: number,
     pos: {xPos: number, yPos: number },
     positionMap: Map<number, [number, number]>
     index: number,

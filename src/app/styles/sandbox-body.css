@@ -1,4 +1,4 @@
-.sandbox-bod-content{
+.sandbox-body-content{
     display: flex;
     justify-content: center;
     margin-top: 10vh;
@@ -13,11 +13,8 @@
 .prog-bar{
     position: relative;
     display: flex;
-    height: 500px;
-    flex-direction: column;
     align-items: center;
     border: 1px solid black;
-    width: 200px;
 }
 .add-task-button{
     display: flex;
@@ -42,4 +39,8 @@
     justify-content: left;
     align-items: baseline;
     padding-left: 10px;
+}
+
+.rotate-svg:hover{
+    cursor: pointer;
 }

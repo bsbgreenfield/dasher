@@ -4,17 +4,19 @@ import {Draggable  } from "../../lib/definitions/task-rect";
 export default function TaskRect({
     task, 
     pos, 
-    height,
+    size,
     positionMap,
     swap,
     color,
+    isVertical,
             }: {
     task: Task,
     pos: {xPos: number, yPos: number},
-    height: number,
+    size: number,
     positionMap: Map<number, [number, number]>
     swap: (oldIndex: number, newIndex: number) => Map<number, [number, number]>,
     color: string,
+    isVertical: boolean,
 }){
     const draggableDiv = new Draggable();
     // in posMap: value[0] = yPos, value[1] = height
@@ -23,12 +25,12 @@ export default function TaskRect({
         let newIndex = task.index;
         positionMap.forEach((value, key) => {
             if(movingDown){
-                if ( task.index < key && newPos.newY + height > value[0] + value[1]){
+                if ( task.index < key && newPos.newY + size > value[0] + value[1]){
                     newIndex = key;
                 }
             }
             else{
-                if(task.index > key && newPos.newY < value[0] + 5){
+                if(task.index > key && newPos.newY < value[0] + 5) {
                     newIndex = key;
                 }
             }
@@ -97,10 +99,21 @@ export default function TaskRect({
         className="task-rect" 
         data-open='false'
         onMouseDown={grabTask}
-        style={
+        style={ isVertical ?
             {"top" : pos.yPos, 
+            "left": "0",
             "backgroundColor": color, 
-            "height": height}
+            "height": size,
+            "width": "97%"
+            } 
+            :  
+            {"top" : "0" ,
+            "left": pos.xPos,
+            "backgroundColor": color, 
+            "height": "97%",
+            "width": size,
+            }
+
         }
         >
             {task.name}

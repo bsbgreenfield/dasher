@@ -28,7 +28,6 @@ export default function Sandbox() {
     }
 
     function switchTaskIndices(oldIndex: number, newIndex: number, progBarId: string): Task[]{
-       console.log(`switching ${oldIndex} to ${newIndex}`)
         const newTasks: Task[] = [];
         const progBarTasks: Task[] = progBarsMap.current.get(progBarId)!
         if (newIndex < 0) newIndex = 0; // im not sure why it does 
@@ -73,9 +72,8 @@ export default function Sandbox() {
                     {formVisible ? "Cancel" : "Create new Task"}
                 </div>
             </div>
-            <div style={{"display": "flex"}}>
+            <div style={{"display": "flex", "justifyContent": "center"}}>
                 <ProgBar id={"a"} tasks={progBarsMap.current.get("a") || [] }  addTask={addTask} switchTaskIndices={switchTaskIndices} />
-                <ProgBar id={"b"} tasks={progBarsMap.current.get("b") || [] }  addTask={addTask} switchTaskIndices={switchTaskIndices} />
             </div>
            
         </div>
