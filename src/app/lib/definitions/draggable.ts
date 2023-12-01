@@ -7,6 +7,7 @@ export interface iDraggable {
 export class Draggable implements iDraggable {
     public currentPosition = {xPos: 0, yPos: 0};
     move(divId: HTMLDivElement, xPos: number, yPos: number): void {
+        console.log(xPos, yPos)
         divId.style.left = xPos + 'px';
         divId.style.top = yPos + 'px';
     }
@@ -32,13 +33,13 @@ export class Draggable implements iDraggable {
         }; */
 
         const moveHandler   = (e:MouseEvent) => {
-            let posX: number = containerWidth/2 - divWidth/2; // mouse x position
+            let posX: number =e.clientX - containerBounds.left - divWidth/2; // mouse x position
             let posY: number = e.clientY - containerBounds.top - divHeight/2; // mouse y position
-            if (posX + divWidth -5 > containerWidth) {
-                posX = containerWidth - divWidth -5;
+            if (posX + divWidth > containerWidth) {
+                posX = containerWidth - divWidth ;
             }
-            if(posX < 5){
-                posX = 5;
+            if(posX < 0){
+                posX = 0;
             }
             if (posY + divHeight > containerHeight) {
                 posY = containerHeight - divHeight;
@@ -63,7 +64,7 @@ export class Draggable implements iDraggable {
         const containerBounds = container.getBoundingClientRect();
         const divBounds = divId.getBoundingClientRect();
 
-        const newX =  divBounds.left -containerBounds.left ;
+        const newX =  divBounds.left - containerBounds.left ;
         const newY = divBounds.top - containerBounds.top;
         return { newX, newY };
     }

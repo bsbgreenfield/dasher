@@ -28,7 +28,6 @@ export default function ProgBar({ tasks, id, addTask, switchTaskIndices }: {
   }
 
   function getProgBarTasks(tasks: Task[]): ProgBarTask[] {
-    console.log(tasks);
     let newPosMap = getUpdatedPosMap(tasks)
     let pos = { xPos: 0, yPos: 0 };
     let progBarTaskArray: ProgBarTask[] = [];
@@ -57,7 +56,6 @@ export default function ProgBar({ tasks, id, addTask, switchTaskIndices }: {
     let newYPos: number = 0; //initialize new position (pixels) for the first task element
     for (let i = 0; i < tasks.length; i++) {
       let taskAtIthPosition = tasks.find(task => task.index == i)
-      console.log(taskAtIthPosition);
       newTaskPosMap.set(i, [newYPos, taskAtIthPosition!.size])
 
       newYPos = newYPos + taskAtIthPosition!.size
@@ -75,7 +73,6 @@ export default function ProgBar({ tasks, id, addTask, switchTaskIndices }: {
 
 
   function flipBar() {
-    console.log("flip");
     setVerticalFlip(!verticalFlip);
   }
 
@@ -83,16 +80,16 @@ export default function ProgBar({ tasks, id, addTask, switchTaskIndices }: {
 
   return (
     <div className="sandbox-body" style={verticalFlip ? { "flexDirection": "column" } : { "flexDirection": "row" }}>
-      <div className="progbar-top">
-        <div onClick={flipBar}>
+      <div className="progbar-top" style={verticalFlip ? {"flexDirection": "row", "alignItems": "baseline"} : {"flexDirection": "column", "alignItems": "end"}}>
+        <div onClick={flipBar} >
           <RotateSVG />
         </div>
-        <div className="add-task-button" onClick={() => { setFormVisible(!formVisible) }}>
+        <div className="add-task-button" onClick={() => { setFormVisible(!formVisible) }} style={ verticalFlip? {"justifyContent": "center"} : {"justifyContent": "end"}}>
           {formVisible ? "-" : "+"}
         </div>
       </div>
       <div className="sandbox-body-content">
-        <div className="prog-bar" style={verticalFlip ? { "height": "500px", "width": "200px" } : { "height": "200px", "width": "500px" }}>
+        <div className="prog-bar" style={verticalFlip ? { "height": "500px", "width": "150px" } : { "height": "150px", "width": "500px" }}>
           {progBarTasks ?
             progBarTasks!.map(task => <TaskRect
               key={task.id}
