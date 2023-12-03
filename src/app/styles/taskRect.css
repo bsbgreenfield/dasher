@@ -1,6 +1,10 @@
 .task-rect{
     border: 1px solid black;
     text-align: center;
+    display: flex;
+    justify-content: center;
+    align-content: center;
+    flex-wrap: wrap;
     background-color: rgb(103, 221, 60);
     border-radius: 5px;
     position: absolute;

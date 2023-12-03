@@ -7,7 +7,7 @@ export interface iDraggable {
 export class Draggable implements iDraggable {
     public currentPosition = {xPos: 0, yPos: 0};
     move(divId: HTMLDivElement, xPos: number, yPos: number): void {
-        console.log(xPos, yPos)
+        
         divId.style.left = xPos + 'px';
         divId.style.top = yPos + 'px';
     }
@@ -15,7 +15,7 @@ export class Draggable implements iDraggable {
 
         const containerBounds = container.getBoundingClientRect();
         this.currentPosition = originalPosition;
-        console.log(this.currentPosition);
+        
         let divWidth: number = divId.clientWidth; //width of draggable div
         let divHeight: number = divId.clientHeight; // height of draggable div
         let containerWidth: number = container.clientWidth; // width of containing box

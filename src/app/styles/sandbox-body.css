@@ -38,3 +38,14 @@
 .rotate-svg:hover{
     cursor: pointer;
 }
+.open-task-form-body{
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    width: 600px;
+    height: 500px;
+    padding: 30px;
+}
+.open-task-form-body div input{
+    width: 200px;
+}

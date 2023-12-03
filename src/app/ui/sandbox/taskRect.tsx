@@ -1,5 +1,5 @@
 
-import { Task } from "../../lib/definitions/types";
+import { ProgBarTask, Task } from "../../lib/definitions/types";
 import { Draggable } from "../../lib/definitions/draggable";
 export default function TaskRect({
     task,
@@ -9,14 +9,16 @@ export default function TaskRect({
     swap,
     color,
     isVertical,
+    viewTask,
 }: {
-    task: Task,
+    task: ProgBarTask,
     pos: { xPos: number, yPos: number },
     size: number,
     positionMap: Map<number, [number, number]>
     swap: (oldIndex: number, newIndex: number) => Map<number, [number, number]>,
     color: string,
     isVertical: boolean,
+    viewTask: (task: ProgBarTask) => void
 }) {
     const draggableDiv = new Draggable();
     // in posMap: value[0] = yPos, value[1] = height
@@ -105,26 +107,10 @@ export default function TaskRect({
         }
 
     }
-    const viewDetails = (event: React.MouseEvent) => {
-
-        if (event.currentTarget) {
-            const selectedTask = event.currentTarget as HTMLDivElement;
-            if (selectedTask.getAttribute("data-open") == 'false') {
-                const descriptionRow: HTMLDivElement = document.createElement("div");
-                descriptionRow.textContent = task.description.toString();
-                selectedTask.appendChild(descriptionRow);
-                selectedTask.setAttribute("data-open", 'true');
-            } else {
-                const descriptionRow = selectedTask.firstElementChild;
-                if (descriptionRow) selectedTask.removeChild(descriptionRow);
-                selectedTask.setAttribute("data-open", 'false');
-            }
-
-        }
-        event.preventDefault();
-    }
+ 
     return (
         <div
+            onClick={() => viewTask(task)}
             id={task.id}
             className="task-rect"
             data-open='false'

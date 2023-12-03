@@ -6,10 +6,10 @@ import "../../styles/task-form.css";
 import "../../styles/topbar.css";
 import "../../styles/prog-bar.css";
 import "../../styles/sandbox-body.css";
-import { useEffect, useReducer, useRef, useState } from "react";
+import { EventHandler, useEffect, useReducer, useRef, useState } from "react";
 import TaskRect from "./taskRect";
 import { colorArray, dummyTasks } from "@/app/data/dummy_data";
-import { Task } from "@/app/lib/definitions/types";
+import { ProgBarTask, Role, Task, User } from "@/app/lib/definitions/types";
 import NewTaskForm from "./newTaskForm";
 import ProgBar from "./progBar";
 
@@ -19,6 +19,15 @@ export default function Sandbox() {
     progMapInit.set("a", [dummyTasks[0], dummyTasks[1], dummyTasks[2]]);
     progMapInit.set("b", [dummyTasks[3], dummyTasks[4], dummyTasks[5]]);
     const progBarsMap = useRef<Map<string, Task[]>>(progMapInit);
+
+    const [openTask, setOpenTask]= useState<ProgBarTask>()
+
+    function viewTask(task: ProgBarTask): void{
+        let modal: HTMLDialogElement = document.getElementById("task-modal") as HTMLDialogElement;
+        setOpenTask(task);
+        modal.showModal();
+    }
+
 
     function addTask(progBarId: string, task: Task): Task[]{
         const newProgBarMap = progBarsMap;
@@ -60,7 +69,50 @@ export default function Sandbox() {
     const toggleForm = () => {
         setFormVisible(!formVisible)
     }
-  
+    const [openTaskFormData, setOpenTaskFormData] = useState({openTaskName: "", openTaskDescription: "" ,openTaskOwner: {username: "", role: Role.other}, openTaskSize: 50});
+    
+    const updateOpenTaskForm = (e: React.ChangeEvent<HTMLInputElement>) =>{
+        const inputKey: string = e.target.name;
+        const inputValue: string = e.target.value;
+        const newData = {...openTaskFormData }
+        switch (inputKey) {
+            case 'openTaskName':
+                newData.openTaskName = inputValue
+                break;
+            case 'openTaskDescription':
+                newData.openTaskDescription = inputValue
+                break;
+            case 'openTaskOwner':
+                newData.openTaskOwner = {username: inputValue, role: Role.other}
+                break;
+            case 'openTaskSize':
+                newData.openTaskSize = parseInt(inputValue)
+                break;
+            default:
+                break;
+        }
+        
+        setOpenTaskFormData(newData);
+    }
+    function updateProgBarsMap(formData: {openTaskName: string, openTaskDescription: string, openTaskOwner: User, openTaskSize: number}, openTask: ProgBarTask){
+        let newTask : Task = {
+            id: openTask.id,
+            name: formData.openTaskName,
+            description: formData.openTaskDescription,
+            owner: formData.openTaskOwner,
+            size: formData.openTaskSize,
+            index: openTask.index
+        }
+        let updatedTaskArray =  [...progBarsMap.current.get(openTask.id.split('-')[0])!];
+        let taskIndex = updatedTaskArray.findIndex(element => element.id == openTask.id);
+        updatedTaskArray[taskIndex] = newTask;
+        progBarsMap.current.set((openTask.id.split('-')[0]), updatedTaskArray);
+    }
+    useEffect(() => {
+        if(openTask){
+            setOpenTaskFormData({ openTaskName: openTask.name, openTaskDescription: openTask.description, openTaskOwner: openTask.owner, openTaskSize: openTask.size })
+        } 
+    }, [openTask])
     return (
         <div>
             <div className="top-bar">
@@ -73,9 +125,64 @@ export default function Sandbox() {
                 </div>
             </div>
             <div style={{"display": "flex", "justifyContent": "center"}}>
-                <ProgBar id={"a"} tasks={progBarsMap.current.get("a") || [] }  addTask={addTask} switchTaskIndices={switchTaskIndices} />
+                <ProgBar id={"a"} tasks={progBarsMap.current.get("a") || [] }  addTask={addTask} switchTaskIndices={switchTaskIndices} viewTask = {viewTask} />
             </div>
-           
+           <dialog id="task-modal" >
+            <div onClick={()=> {
+                let modal = document.getElementById('task-modal') as HTMLDialogElement
+                updateProgBarsMap(openTaskFormData, openTask!)
+                modal.close()
+                console.log(progBarsMap)
+            }}>CLOSE</div>
+                    <div id="modal-body">
+                        <form>
+                            <div className="open-task-form-body">
+                                <div>
+                                    <label htmlFor="openTaskName">Name: </label>
+                                    <input
+                                        type="text" 
+                                        id="openTaskName" 
+                                        name="openTaskName" 
+                                        value={openTaskFormData['openTaskName']}
+                                        onChange={updateOpenTaskForm}
+                                    />
+                                </div>
+                                <div>
+                                    <label htmlFor="openTaskDescription">Description: </label>
+                                    <input 
+                                        type="text" 
+                                        id="openTaskDescription" 
+                                        name="openTaskDescription"  
+                                        value={openTaskFormData['openTaskDescription']}
+                                        onChange={updateOpenTaskForm}
+                                    />
+                                </div>
+                                <div>
+                                    <label htmlFor="openTaskOwner">Owner: </label>
+                                    <input 
+                                        type="text" 
+                                        id="openTaskOwner" 
+                                        name="openTaskOwner"  
+                                        value={openTaskFormData['openTaskOwner'].username}
+                                        onChange={updateOpenTaskForm}
+                                    />
+                                </div>
+                               <div>
+                                <label htmlFor="openTaskSize">Size: </label>
+                                <input 
+                                    type="text" 
+                                    id="openTaskSize" 
+                                    name="openTaskSize"  
+                                    value={openTaskFormData['openTaskSize']}
+                                    onChange={updateOpenTaskForm}
+                                    />    
+                               </div>
+                               
+                            </div>
+                            
+                        </form>
+                    </div>
+           </dialog>
         </div>
 
     )

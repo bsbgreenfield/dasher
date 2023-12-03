@@ -5,11 +5,12 @@ import { colorArray } from "@/app/data/dummy_data";
 import NewTaskForm from "./newTaskForm";
 import { createTask } from "@/app/lib/actions";
 import RotateSVG from "./svg";
-export default function ProgBar({ tasks, id, addTask, switchTaskIndices }: {
+export default function ProgBar({ tasks, id, addTask, switchTaskIndices, viewTask}: {
   tasks: Task[] | [],
   id: string,
-  addTask: (id: string, task: Task) => Task[];
-  switchTaskIndices: (oldIndex: number, newIndex: number, progBarId: string) => Task[]
+  addTask: (id: string, task: Task) => Task[],
+  switchTaskIndices: (oldIndex: number, newIndex: number, progBarId: string) => Task[],
+  viewTask: (task: ProgBarTask) => void;
 }) {
   const [formVisible, setFormVisible] = useState(false);
   const [verticalFlip, setVerticalFlip] = useState(true);
@@ -100,6 +101,7 @@ export default function ProgBar({ tasks, id, addTask, switchTaskIndices }: {
               swap={doTaskSwap}
               color={colorsArray[parseInt(task.id.split('-').pop()!)]}
               isVertical={verticalFlip}
+              viewTask = {viewTask}
             />)
             : <></>}
         </div>
