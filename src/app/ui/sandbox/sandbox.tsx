@@ -18,7 +18,7 @@ export default function Sandbox() {
     const progMapInit = new Map<string, Task[]>();
     progMapInit.set("a", [dummyTasks[0], dummyTasks[1], dummyTasks[2]]);
     progMapInit.set("b", [dummyTasks[3], dummyTasks[4], dummyTasks[5]]);
-    const progBarsMap = useRef<Map<string, Task[]>>(progMapInit);
+    const [progBarsMap, setProgBarsMap] = useState<Map<string, Task[]>>(progMapInit);
 
     const [openTask, setOpenTask]= useState<ProgBarTask>()
 
@@ -30,15 +30,16 @@ export default function Sandbox() {
 
 
     function addTask(progBarId: string, task: Task): Task[]{
-        const newProgBarMap = progBarsMap;
-        const newTaskArray = [...progBarsMap.current.get(progBarId)!, task];
-        newProgBarMap.current.set(progBarId, newTaskArray);
+        const newProgBarMap = new Map(progBarsMap);
+        const newTaskArray = [...progBarsMap.get(progBarId)!, task];
+        newProgBarMap.set(progBarId, newTaskArray);
+        setProgBarsMap(newProgBarMap);
         return newTaskArray
     }
 
     function switchTaskIndices(oldIndex: number, newIndex: number, progBarId: string): Task[]{
         const newTasks: Task[] = [];
-        const progBarTasks: Task[] = progBarsMap.current.get(progBarId)!
+        const progBarTasks: Task[] = progBarsMap.get(progBarId)!
         if (newIndex < 0) newIndex = 0; // im not sure why it does 
         const movingDown = (oldIndex < newIndex);
         for (let i = 0; i < progBarTasks.length; i++) {
@@ -61,7 +62,9 @@ export default function Sandbox() {
     
             newTasks.push(newTask);
         }
-        progBarsMap.current.set(progBarId, newTasks)
+        let newProgBarsMap = new Map(progBarsMap);
+        newProgBarsMap.set(progBarId, newTasks)
+        setProgBarsMap(newProgBarsMap);
         return newTasks;
     }
 
@@ -103,10 +106,13 @@ export default function Sandbox() {
             size: formData.openTaskSize,
             index: openTask.index
         }
-        let updatedTaskArray =  [...progBarsMap.current.get(openTask.id.split('-')[0])!];
+        let updatedTaskArray =  [...progBarsMap.get(openTask.id.split('-')[0])!];
         let taskIndex = updatedTaskArray.findIndex(element => element.id == openTask.id);
         updatedTaskArray[taskIndex] = newTask;
-        progBarsMap.current.set((openTask.id.split('-')[0]), updatedTaskArray);
+        let newProgBarsMap = new Map(progBarsMap);
+        newProgBarsMap.set((openTask.id.split('-')[0]), updatedTaskArray);
+        setProgBarsMap(newProgBarsMap);
+        document.getElementById(openTask.id)!.textContent = formData.openTaskName
     }
     useEffect(() => {
         if(openTask){
@@ -125,11 +131,12 @@ export default function Sandbox() {
                 </div>
             </div>
             <div style={{"display": "flex", "justifyContent": "center"}}>
-                <ProgBar id={"a"} tasks={progBarsMap.current.get("a") || [] }  addTask={addTask} switchTaskIndices={switchTaskIndices} viewTask = {viewTask} />
+                <ProgBar id={"a"} tasks={progBarsMap.get("a") || [] }  addTask={addTask} switchTaskIndices={switchTaskIndices} viewTask = {viewTask} />
             </div>
            <dialog id="task-modal" >
             <div onClick={()=> {
                 let modal = document.getElementById('task-modal') as HTMLDialogElement
+                
                 updateProgBarsMap(openTaskFormData, openTask!)
                 modal.close()
                 console.log(progBarsMap)
